@@ -1,0 +1,48 @@
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToMany,
+  JoinTable,
+} from 'typeorm';
+import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Client } from 'src/clients/client.entity';
+import { IsEmail, MinLength } from 'class-validator';
+import { EntityBase } from 'src/utils/entity-base';
+
+@Entity()
+@ObjectType()
+export class User extends EntityBase {
+  @Field(() => ID)
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Field()
+  @Column()
+  @IsEmail()
+  username: string;
+
+  @Column()
+  password: string;
+
+  @Field()
+  @Column()
+  @MinLength(3)
+  firstName: string;
+
+  @Field()
+  @Column()
+  lastName: string;
+
+  @Field()
+  fullName: string;
+
+  @Field()
+  @Column({ default: true })
+  isActive: boolean;
+
+  @Field(() => [Client], { nullable: true })
+  @ManyToMany(() => Client, (client) => client.users, { nullable: true })
+  @JoinTable()
+  clients?: Client[];
+}
