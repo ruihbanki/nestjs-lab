@@ -17,6 +17,7 @@ import { CountriesModule } from './countries/countries.module';
       database: 'nestjs-lab',
       synchronize: true,
       autoLoadEntities: true,
+      logging: true,
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,

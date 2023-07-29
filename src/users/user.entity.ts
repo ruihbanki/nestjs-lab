@@ -35,6 +35,7 @@ export class User extends EntityBase {
   lastName: string;
 
   @Field()
+  @Column({ nullable: true, insert: false, update: false })
   fullName: string;
 
   @Field()
