@@ -6,14 +6,16 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
+import { FindOptionsRelations, FindOptionsSelect } from 'typeorm';
+
+import { Relations } from 'src/utils/relations.decorator';
+import { Select } from 'src/utils/select.decorator';
+
 import { UsersService } from './users.service';
 import { User } from './user.entity';
 import { CreateUserInput } from './create-user.input';
 import { UpdateUserInput } from './update-user.input';
 import { FindUsersArgs } from './find-users.args';
-import { Relations } from 'src/utils/relations.decorator';
-import { FindOptionsRelations, FindOptionsSelect } from 'typeorm';
-import { Select } from 'src/utils/select.decorator';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -37,16 +39,16 @@ export class UsersResolver {
   }
 
   @Mutation(() => User)
-  async createUser(@Args('input') input: CreateUserInput) {
-    return this.usersService.createUser(input);
-  }
-
-  @Mutation(() => User)
-  async createClientUser(
+  async createUser(
     @Args('clientId') clientId: string,
     @Args('input') input: CreateUserInput,
   ) {
-    return this.usersService.createClientUser(clientId, input);
+    return this.usersService.createUser(clientId, input);
+  }
+
+  @Mutation(() => User)
+  async createSuperUser(@Args('input') input: CreateUserInput) {
+    return this.usersService.createSuperUser(input);
   }
 
   @Mutation(() => User)

@@ -34,14 +34,15 @@ export class UsersService {
     });
   }
 
-  async createUser(input: CreateUserInput): Promise<User> {
-    return await this.usersRepository.save(input);
+  async createSuperUser(input: CreateUserInput): Promise<User> {
+    const user = {
+      ...input,
+      isSuper: true,
+    };
+    return await this.usersRepository.save(user);
   }
 
-  async createClientUser(
-    clientId: string,
-    input: CreateUserInput,
-  ): Promise<User> {
+  async createUser(clientId: string, input: CreateUserInput): Promise<User> {
     const user = {
       ...input,
       clients: [

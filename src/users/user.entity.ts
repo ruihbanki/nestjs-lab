@@ -41,8 +41,12 @@ export class User extends EntityBase {
   @Column({ default: true })
   isActive: boolean;
 
+  @Field()
+  @Column({ default: false })
+  isSuper: boolean;
+
   @Field(() => [Client], { nullable: true })
-  @ManyToMany(() => Client, (client) => client.users, { nullable: true })
+  @ManyToMany(() => Client, { nullable: true })
   @JoinTable()
   clients?: Client[];
 }

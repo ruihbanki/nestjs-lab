@@ -1,4 +1,9 @@
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { FindOptionsRelations, FindOptionsSelect } from 'typeorm';
+
+import { Relations } from 'src/utils/relations.decorator';
+import { Select } from 'src/utils/select.decorator';
+
 import { ClientsService } from './clients.service';
 import { Client } from './client.entity';
 import { CreateClientInput } from './create-client.input';
@@ -14,8 +19,11 @@ export class ClientsResolver {
   }
 
   @Query(() => [Client])
-  async findClients() {
-    return this.clientsService.findClients();
+  async findClients(
+    @Relations() relations: FindOptionsRelations<Client>,
+    @Select() select: FindOptionsSelect<Client>,
+  ) {
+    return this.clientsService.findClients({ select, relations });
   }
 
   @Mutation(() => Client)

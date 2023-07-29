@@ -6,7 +6,6 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { User } from 'src/users/user.entity';
 import { EntityBase } from 'src/utils/entity-base';
 import { Country } from 'src/countries/country.entity';
 
@@ -22,7 +21,7 @@ export class Client extends EntityBase {
   name: string;
 
   @Field()
-  @Column()
+  @Column({ unique: true })
   domain: string;
 
   @Field({ nullable: true })
@@ -34,10 +33,6 @@ export class Client extends EntityBase {
   isActive: boolean;
 
   @Field(() => Country)
-  @ManyToOne(() => Country)
+  @ManyToOne(() => Country, { nullable: false })
   country: Country;
-
-  @Field(() => [User], { nullable: true })
-  @ManyToMany(() => User, (user) => user.clients, { nullable: true })
-  users?: User[];
 }

@@ -1,9 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsRelations, FindOptionsSelect, Repository } from 'typeorm';
+
+import { UpdateUserInput } from 'src/users/update-user.input';
+
 import { Client } from './client.entity';
 import { CreateClientInput } from './create-client.input';
-import { UpdateUserInput } from 'src/users/update-user.input';
+
+interface FindClientsOptions {
+  withDeleted?: boolean;
+  relations?: FindOptionsRelations<Client>;
+  select?: FindOptionsSelect<Client>;
+}
 
 @Injectable()
 export class ClientsService {
@@ -12,8 +20,13 @@ export class ClientsService {
     private clientsRepository: Repository<Client>,
   ) {}
 
-  findClients(): Promise<Client[]> {
-    return this.clientsRepository.find({ relations: { users: true } });
+  findClients(options: FindClientsOptions = {}): Promise<Client[]> {
+    const { relations, select, withDeleted } = options;
+    return this.clientsRepository.find({
+      relations,
+      select,
+      withDeleted,
+    });
   }
 
   findClientById(id: string): Promise<Client | null> {
