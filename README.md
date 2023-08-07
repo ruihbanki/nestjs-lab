@@ -1,73 +1,166 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Introduction
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+The goal for this project is to experiment some solutions for common scenarios using Nests, GraphQL and TypeORM
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+# Entities
 
-## Description
+## Class definition
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Decorate the class with @Entity() and @ObjectType()
 
-## Installation
+- Use the same class for both?
+- Use DTO? Check nest-query docs.
 
-```bash
-$ npm install
+```
+@Entity()
+@ObjectType()
+export class User {
+  ...
+}
 ```
 
-## Running the app
+## Primary ID
 
-```bash
-# development
-$ npm run start
+- Use uuid and id? Is it necessary?
 
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```
+@Field(() => ID)
+@PrimaryGeneratedColumn('uuid')
+id: string;
 ```
 
-## Test
+## Saving default values
 
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+```
+@Column({ default: true })
+isActive: boolean;
 ```
 
-## Support
+## Unique fields
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```
+@Field()
+@Column({ unique: true })
+domain: string;
+```
 
-## Stay in touch
+## Optional fields
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```
+@Field({ nullable: true })
+@Column({ nullable: true })
+website?: string;
+```
 
-## License
+## Entity base
 
-Nest is [MIT licensed](LICENSE).
+Extend this class to enable creating and update of some columns
+
+```
+@ObjectType()
+@Entity()
+export abstract class EntityBase {
+  @Field()
+  @CreateDateColumn()
+  createdAt?: Date;
+
+  @Field({ nullable: true })
+  @DeleteDateColumn({ nullable: true })
+  deletedAt?: Date;
+
+  @Field()
+  @UpdateDateColumn()
+  updatedAt?: Date;
+}
+
+@Entity()
+@ObjectType()
+export class Client extends EntityBase {
+}
+```
+
+# Input
+
+# CRUD
+
+## Create
+
+## Update
+
+## Delete
+
+# Find
+
+## Pagination
+
+### Offset pagination
+
+### Cursor pagination
+
+## Sort
+
+## Performance
+
+Use the custom @Relations decorator to return the relations to be used in the find method. It gets this using the graphql info. E.g. { clients: true }.
+
+Use the custom @Select decorator to return only the required query fields. E.g. { name: true, client: { id:true }}.
+
+```
+@Resolver(() => User)
+export class UsersResolver {
+  constructor(private usersService: UsersService) {}
+
+  @Query(() => [User])
+  async findUsers(
+    @Relations() relations: FindOptionsRelations<User>,
+    @Select() select: FindOptionsSelect<User>,
+    @Args() args?: FindUsersArgs,
+  ) {
+    const { withDeleted } = args;
+    return this.usersService.findUsers({ withDeleted, relations, select });
+  }
+}
+
+```
+
+# Relations
+
+## Many to one
+
+```
+@Entity()
+@ObjectType()
+export class Client extends EntityBase {
+  @Field(() => Country)
+  @ManyToOne(() => Country, { nullable: false })
+  country: Country;
+}
+```
+
+## Many to many with one side
+
+Just the User has a list of clients. The client doesn't have an users field.
+
+```
+@Entity()
+@ObjectType()
+export class User extends EntityBase {
+  @Field(() => [Client], { nullable: true })
+  @ManyToMany(() => Client, { nullable: true })
+  @JoinTable()
+  clients?: Client[];
+}
+```
+
+## Many to many with both sides
+
+# Auth
+
+- Create an @AuthData('userId') parameter decorator? Returns the data from the token and throw an UnauthorizedException in case of an inexistent data. E.g. Some tokens can have a clientId, userId or both.
+- How create an abstraction to easily migrate to an external service.
+- Integrate with OAuth
+
+# Indexes
+
+- How create indexes for full text search for fields like "firstName" and "lastName"? One index for each column or one for both?
+- Sort fields required indexes?

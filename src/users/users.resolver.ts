@@ -33,8 +33,6 @@ export class UsersResolver {
     @Args() args?: FindUsersArgs,
   ) {
     const { withDeleted } = args;
-    console.log(select);
-
     return this.usersService.findUsers({ withDeleted, relations, select });
   }
 

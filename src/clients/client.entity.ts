@@ -1,10 +1,4 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  ManyToMany,
-  ManyToOne,
-} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { EntityBase } from 'src/utils/entity-base';
 import { Country } from 'src/countries/country.entity';
