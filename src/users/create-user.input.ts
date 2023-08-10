@@ -17,4 +17,7 @@ export class CreateUserInput {
   @Field()
   @MinLength(3)
   lastName: string;
+
+  @Field(() => Date)
+  dateOfBirth: string;
 }

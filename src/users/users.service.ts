@@ -27,9 +27,9 @@ export class UsersService {
     });
   }
 
-  findUserById(id: string): Promise<User | null> {
+  findUserById(userId: string): Promise<User | null> {
     return this.usersRepository.findOne({
-      where: { id },
+      where: { userId },
       relations: { clients: true },
     });
   }

@@ -67,9 +67,4 @@ export class UsersResolver {
   async softDeleteUser(@Args('id') id: string) {
     return this.usersService.softDelete(id);
   }
-
-  @ResolveField()
-  fullName(@Parent() user: User) {
-    return `${user.firstName} ${user.lastName}`;
-  }
 }

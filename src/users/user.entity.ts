@@ -14,36 +14,36 @@ import { EntityBase } from 'src/utils/entity-base';
 @ObjectType()
 export class User extends EntityBase {
   @Field(() => ID)
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn('uuid', { name: 'user_id' })
+  userId: string;
 
   @Field()
-  @Column()
   @IsEmail()
+  @Column()
   username: string;
 
   @Column()
   password: string;
 
   @Field()
-  @Column()
   @MinLength(3)
+  @Column({ name: 'first_name' })
   firstName: string;
 
   @Field()
-  @Column()
+  @Column({ name: 'last_name' })
   lastName: string;
 
   @Field()
-  @Column({ nullable: true, insert: false, update: false })
-  fullName: string;
+  @Column({ name: 'date_of_birth', type: 'date' })
+  dateOfBirth: Date;
 
   @Field()
-  @Column({ default: true })
+  @Column({ name: 'is_active', default: true })
   isActive: boolean;
 
   @Field()
-  @Column({ default: false })
+  @Column({ name: 'is_super', default: false })
   isSuper: boolean;
 
   @Field(() => [Client], { nullable: true })
