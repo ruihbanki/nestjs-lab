@@ -26,18 +26,16 @@ export class User {
 
 ## Primary ID
 
-- Use uuid and id? Is it necessary?
-
 ```
 @Field(() => ID)
-@PrimaryGeneratedColumn('uuid')
-id: string;
+@PrimaryGeneratedColumn('uuid', { name: 'user_id' })
+userId: string;
 ```
 
 ## Saving default values
 
 ```
-@Column({ default: true })
+@Column({ name: 'is_active', default: true })
 isActive: boolean;
 ```
 
@@ -66,15 +64,15 @@ Extend this class to enable creating and update of some columns
 @Entity()
 export abstract class EntityBase {
   @Field()
-  @CreateDateColumn()
+  @CreateDateColumn({ name: 'created_at' })
   createdAt?: Date;
 
   @Field({ nullable: true })
-  @DeleteDateColumn({ nullable: true })
+  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
   deletedAt?: Date;
 
   @Field()
-  @UpdateDateColumn()
+  @UpdateDateColumn({ name: 'updated_at' })
   updatedAt?: Date;
 }
 
