@@ -6,8 +6,8 @@ import { EntityBase } from 'src/utils/entity-base';
 @ObjectType()
 export class Country extends EntityBase {
   @Field(() => ID)
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn('uuid', { name: 'country_id' })
+  countryId: string;
 
   @Field()
   @Column()

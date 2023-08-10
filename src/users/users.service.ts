@@ -47,7 +47,7 @@ export class UsersService {
       ...input,
       clients: [
         {
-          id: clientId,
+          clientId,
         },
       ],
     };

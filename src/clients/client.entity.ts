@@ -14,8 +14,8 @@ import { User } from 'src/users/user.entity';
 @ObjectType()
 export class Client extends EntityBase {
   @Field(() => ID)
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn('uuid', { name: 'client_id' })
+  clientId: string;
 
   @Field()
   @Column()
@@ -30,7 +30,7 @@ export class Client extends EntityBase {
   website?: string;
 
   @Field()
-  @Column({ default: true })
+  @Column({ name: 'is_active', default: true })
   isActive: boolean;
 
   @Field(() => Country)

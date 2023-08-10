@@ -29,12 +29,12 @@ export class ClientsService {
     });
   }
 
-  findClientById(id: string): Promise<Client | null> {
-    return this.clientsRepository.findOneBy({ id });
+  findClientById(clientId: string): Promise<Client | null> {
+    return this.clientsRepository.findOneBy({ clientId });
   }
 
-  async createClient(user: CreateClientInput): Promise<Client> {
-    return await this.clientsRepository.save(user);
+  async createClient(client: CreateClientInput): Promise<Client> {
+    return await this.clientsRepository.save(client);
   }
 
   async removeClient(id: string): Promise<boolean> {
