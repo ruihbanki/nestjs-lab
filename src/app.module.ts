@@ -5,6 +5,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { UsersModule } from './users/users.module';
 import { ClientsModule } from './clients/clients.module';
 import { CountriesModule } from './countries/countries.module';
+import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { CountriesModule } from './countries/countries.module';
     ClientsModule,
     UsersModule,
     CountriesModule,
+    ProductsModule,
   ],
   providers: [],
 })
