@@ -2,6 +2,11 @@
 
 The goal for this project is to experiment some solutions for common scenarios using Nests, GraphQL and TypeORM
 
+# Scripts
+
+run on http://localhost:5000/graphql
+`npm run start:dev`
+
 # Entities
 
 ## Class definition
@@ -154,11 +159,31 @@ export class User extends EntityBase {
 
 ## Many to many with both sides
 
+```
+@Entity()
+@ObjectType()
+export class Client {
+  @Field(() => [User], { nullable: true })
+  @ManyToMany(() => User, (user) => user.clients, { nullable: true })
+  users?: User[];
+}
+
+@Entity()
+@ObjectType()
+export class User {
+  @Field(() => [Client], { nullable: true })
+  @ManyToMany(() => Client, (client) => client.users, { nullable: true })
+  @JoinTable()
+  clients?: Client[];
+}
+```
+
 # Auth
 
 - Create an @AuthData('userId') parameter decorator? Returns the data from the token and throw an UnauthorizedException in case of an inexistent data. E.g. Some tokens can have a clientId, userId or both.
 - How create an abstraction to easily migrate to an external service.
-- Integrate with OAuth
+- Integrate with OAuth?
+- Is it possible to create multiples schemas depending on @AuthData? This could be use to help the developer to find public operations.
 
 # Indexes
 

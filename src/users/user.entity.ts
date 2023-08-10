@@ -47,7 +47,7 @@ export class User extends EntityBase {
   isSuper: boolean;
 
   @Field(() => [Client], { nullable: true })
-  @ManyToMany(() => Client, { nullable: true })
+  @ManyToMany(() => Client, (client) => client.users, { nullable: true })
   @JoinTable()
   clients?: Client[];
 }
