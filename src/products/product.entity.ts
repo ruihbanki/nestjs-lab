@@ -16,4 +16,8 @@ export class Product extends EntityBase {
   @Field()
   @Column({ type: 'float' })
   price: number;
+
+  @Field()
+  @Column({ type: 'int' })
+  available: number;
 }

@@ -7,4 +7,7 @@ export class CreateProductInput {
 
   @Field()
   price: number;
+
+  @Field()
+  available: number;
 }
