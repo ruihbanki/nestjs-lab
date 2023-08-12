@@ -36,7 +36,7 @@ export class User extends EntityBase {
 
   @Field()
   @Column({ name: 'date_of_birth', type: 'date' })
-  dateOfBirth: Date;
+  dateOfBirth: string;
 
   @Field()
   @Column({ name: 'is_active', default: true })
