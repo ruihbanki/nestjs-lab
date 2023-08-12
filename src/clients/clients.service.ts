@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import {
   DataSource,
@@ -70,40 +70,33 @@ export class ClientsService {
     input: UpdateClientInput,
     options: FindOptions = {},
   ): Promise<Client> {
-    return await this.dataSource.transaction(
-      async (transactionalEntityManager) => {
-        // get repositories
-        const clientsRepository =
-          transactionalEntityManager.getRepository(Client);
-        const clientContactsRepository =
-          transactionalEntityManager.getRepository(ClientContact);
+    await this.dataSource.transaction(async (transactionalEntityManager) => {
+      // get repositories
+      const clientsRepository =
+        transactionalEntityManager.getRepository(Client);
+      const clientContactsRepository =
+        transactionalEntityManager.getRepository(ClientContact);
 
-        // delete client contacts
-        clientContactsRepository.delete({ client: { clientId } });
+      // delete client contacts
+      clientContactsRepository.delete({ client: { clientId } });
 
-        // update client without passing the contacts
-        const inputWithoutContacts = {
-          ...input,
-          contacts: undefined,
-        };
-        clientsRepository.update(clientId, inputWithoutContacts);
+      // update client without passing the contacts
+      const inputWithoutContacts = {
+        ...input,
+        contacts: undefined,
+      };
+      clientsRepository.update(clientId, inputWithoutContacts);
 
-        // insert new contacts
-        const clientContacts = input.contacts.map((c) => ({
-          ...c,
-          client: {
-            clientId,
-          },
-        }));
-        clientContactsRepository.save(clientContacts);
+      // insert new contacts
+      const clientContacts = input.contacts.map((c) => ({
+        ...c,
+        client: {
+          clientId,
+        },
+      }));
+      clientContactsRepository.save(clientContacts);
+    });
 
-        // return the entity
-        return clientsRepository.findOne({
-          where: { clientId },
-          relations: options.relations,
-          select: options.select,
-        });
-      },
-    );
+    return this.findClientById(clientId, options);
   }
 }

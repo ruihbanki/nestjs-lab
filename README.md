@@ -188,21 +188,6 @@ export class Client extends EntityBase {
 }
 ```
 
-## Many to many with one side
-
-Just the User has a list of clients. The client doesn't have an users field.
-
-```
-@Entity()
-@ObjectType()
-export class User extends EntityBase {
-  @Field(() => [Client], { nullable: true })
-  @ManyToMany(() => Client, { nullable: true })
-  @JoinTable()
-  clients?: Client[];
-}
-```
-
 ## Many to many with both sides
 
 ```
@@ -222,6 +207,84 @@ export class User {
   @JoinTable()
   clients?: Client[];
 }
+```
+
+## One to many cascade
+
+When creating or updating a new entity, delete all existent children and add new ones and when deleting the parent delete the children too.
+
+- The creation is done by the cascade = true
+- The deletion is done by the onDelete: 'CASCADE'
+- The addition of new ones on update is made in a transaction
+
+```
+@Entity()
+@ObjectType()
+export class Client {
+  @Field(() => [ClientContact], { nullable: false })
+  @OneToMany(() => ClientContact, (clientContact) => clientContact.client, {
+    nullable: false,
+    cascade: true,
+  })
+  contacts?: ClientContact[];
+}
+
+@Entity()
+@ObjectType()
+export class ClientContact {
+  @ManyToOne(() => Client, (client) => client.contacts, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'client_id' })
+  client: Client;
+}
+
+@Injectable()
+export class ClientsService {
+  constructor(
+    @InjectDataSource()
+    private dataSource: DataSource,
+
+    @InjectRepository(Client)
+    private clientsRepository: Repository<Client>,
+  ) {}
+
+  async updateClient(
+    clientId: string,
+    input: UpdateClientInput,
+    options: FindOptions = {},
+  ): Promise<Client> {
+    await this.dataSource.transaction(async (transactionalEntityManager) => {
+      // get repositories
+      const clientsRepository =
+        transactionalEntityManager.getRepository(Client);
+      const clientContactsRepository =
+        transactionalEntityManager.getRepository(ClientContact);
+
+      // delete client contacts
+      clientContactsRepository.delete({ client: { clientId } });
+
+      // update client without passing the contacts
+      const inputWithoutContacts = {
+        ...input,
+        contacts: undefined,
+      };
+      clientsRepository.update(clientId, inputWithoutContacts);
+
+      // insert new contacts
+      const clientContacts = input.contacts.map((c) => ({
+        ...c,
+        client: {
+          clientId,
+        },
+      }));
+      clientContactsRepository.save(clientContacts);
+    });
+
+    return this.findClientById(clientId, options);
+  }
+}
+
 ```
 
 # Auth
