@@ -1,11 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsRelations, FindOptionsSelect, Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import {
+  DataSource,
+  FindOptionsRelations,
+  FindOptionsSelect,
+  Repository,
+} from 'typeorm';
 
-import { ClientContact } from 'src/client-contacts/client-contact.entity';
 import { Client } from './client.entity';
 import { CreateClientInput } from './create-client.input';
 import { UpdateClientInput } from './update-client.input';
+import { ClientContact } from 'src/client-contacts/client-contact.entity';
 
 interface FindOptions {
   relations?: FindOptionsRelations<Client>;
@@ -19,10 +24,11 @@ interface FindClientsOptions extends FindOptions {
 @Injectable()
 export class ClientsService {
   constructor(
+    @InjectDataSource()
+    private dataSource: DataSource,
+
     @InjectRepository(Client)
     private clientsRepository: Repository<Client>,
-    @InjectRepository(ClientContact)
-    private clientContactRepository: Repository<ClientContact>,
   ) {}
 
   async findClients(options: FindClientsOptions = {}): Promise<Client[]> {
@@ -64,12 +70,37 @@ export class ClientsService {
     input: UpdateClientInput,
     options: FindOptions = {},
   ): Promise<Client> {
-    const result = await this.clientsRepository.update(clientId, input);
-    if (result.affected === 0) {
-      throw new NotFoundException(
-        `Client with the id '${clientId}' was not found.`,
-      );
-    }
-    return this.findClientById(clientId, options);
+    return await this.dataSource.transaction(
+      async (transactionalEntityManager) => {
+        // get repositories
+        const clientsRepository =
+          transactionalEntityManager.getRepository(Client);
+        const clientContactsRepository =
+          transactionalEntityManager.getRepository(ClientContact);
+
+        // delete client contacts
+        clientContactsRepository.delete({ client: { clientId } });
+
+        // update client without passing the contacts
+        const { contacts, ...inputWithoutContacts } = input;
+        clientsRepository.update(clientId, inputWithoutContacts);
+
+        // insert new contacts
+        const clientContacts = input.contacts.map((c) => ({
+          ...c,
+          clientClientId: clientId,
+        }));
+        console.log(clientContacts);
+
+        clientContactsRepository.save(clientContacts);
+
+        // return the client
+        return clientsRepository.findOne({
+          where: { clientId },
+          relations: options.relations,
+          select: options.select,
+        });
+      },
+    );
   }
 }
