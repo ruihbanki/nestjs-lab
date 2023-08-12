@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { MinLength } from 'class-validator';
 import { Client } from 'src/clients/client.entity';
@@ -25,5 +31,6 @@ export class ClientContact {
   @ManyToOne(() => Client, (client) => client.contacts, {
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'client_id' })
   client: Client;
 }

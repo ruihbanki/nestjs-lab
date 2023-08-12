@@ -82,19 +82,22 @@ export class ClientsService {
         clientContactsRepository.delete({ client: { clientId } });
 
         // update client without passing the contacts
-        const { contacts, ...inputWithoutContacts } = input;
+        const inputWithoutContacts = {
+          ...input,
+          contacts: undefined,
+        };
         clientsRepository.update(clientId, inputWithoutContacts);
 
         // insert new contacts
         const clientContacts = input.contacts.map((c) => ({
           ...c,
-          clientClientId: clientId,
+          client: {
+            clientId,
+          },
         }));
-        console.log(clientContacts);
-
         clientContactsRepository.save(clientContacts);
 
-        // return the client
+        // return the entity
         return clientsRepository.findOne({
           where: { clientId },
           relations: options.relations,
