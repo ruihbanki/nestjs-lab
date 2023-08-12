@@ -14,7 +14,7 @@ export class Product extends EntityBase {
   name: string;
 
   @Field()
-  @Column({ type: 'float' })
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
   price: number;
 
   @Field()

@@ -32,14 +32,14 @@ export class User {
 userId: string;
 ```
 
-## Saving default values
+## Default value
 
 ```
 @Column({ name: 'is_active', default: true })
 isActive: boolean;
 ```
 
-## Unique fields
+## Unique field
 
 ```
 @Field()
@@ -47,12 +47,44 @@ isActive: boolean;
 domain: string;
 ```
 
-## Optional fields
+## Optional field
 
 ```
 @Field({ nullable: true })
 @Column({ nullable: true })
 website?: string;
+```
+
+## Date field
+
+```
+@Field()
+@Column({ name: 'date_of_birth', type: 'date' })
+dateOfBirth: string;
+```
+
+## Date time field
+
+```
+@Field()
+@CreateDateColumn({ name: 'created_at' })
+createdAt?: Date;
+```
+
+## Integer field
+
+```
+@Field()
+@Column({ type: 'int' })
+available: number;
+```
+
+## Decimal field
+
+```
+@Field()
+@Column({ type: 'decimal', precision: 10, scale: 2 })
+price: number;
 ```
 
 ## Entity base
