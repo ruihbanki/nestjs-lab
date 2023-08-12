@@ -32,16 +32,16 @@ export class ClientsResolver {
   }
 
   @Mutation(() => Boolean)
-  async removeClient(@Args('id') id: string) {
-    return this.clientsService.removeClient(id);
+  async removeClient(@Args('clientId') clientId: string) {
+    return this.clientsService.removeClient(clientId);
   }
 
   @Mutation(() => Client)
   async updateClient(
-    @Args('id') id: string,
+    @Args('clientId') clientId: string,
     @Args('input') input: UpdateClientInput,
   ) {
-    await this.clientsService.updateClient(id, input);
-    return this.clientsService.findClientById(id);
+    await this.clientsService.updateClient(clientId, input);
+    return this.clientsService.findClientById(clientId);
   }
 }

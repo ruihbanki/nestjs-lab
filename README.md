@@ -134,9 +134,26 @@ export class Client extends EntityBase {
 
 ## Sort
 
-## Performance
+## Relations decorator
 
 Use the custom @Relations decorator to return the relations to be used in the find method. It gets this using the graphql info. E.g. { clients: true }.
+
+```
+@Resolver(() => User)
+export class UsersResolver {
+  constructor(private usersService: UsersService) {}
+
+  @Query(() => [User])
+  async findUsers(
+    @Relations() relations: FindOptionsRelations<User>,
+  ) {
+    return this.usersService.findUsers({ relations });
+  }
+}
+
+```
+
+## Select decorator
 
 Use the custom @Select decorator to return only the required query fields. E.g. { name: true, client: { id:true }}.
 
@@ -147,12 +164,9 @@ export class UsersResolver {
 
   @Query(() => [User])
   async findUsers(
-    @Relations() relations: FindOptionsRelations<User>,
     @Select() select: FindOptionsSelect<User>,
-    @Args() args?: FindUsersArgs,
   ) {
-    const { withDeleted } = args;
-    return this.usersService.findUsers({ withDeleted, relations, select });
+    return this.usersService.findUsers({ select });
   }
 }
 

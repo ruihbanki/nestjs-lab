@@ -1,16 +1,8 @@
-import { Field, InputType } from '@nestjs/graphql';
+import { InputType, OmitType, PartialType } from '@nestjs/graphql';
+import { CreateClientInput } from './create-client.input';
 
 @InputType()
-export class UpdateClientInput {
-  @Field({ nullable: true })
-  name: string;
-
-  @Field({ nullable: true })
-  domain: string;
-
-  @Field({ nullable: true })
-  website?: string;
-
-  @Field({ nullable: true })
-  isActive?: boolean;
-}
+export class UpdateClientInput extends OmitType(
+  PartialType(CreateClientInput),
+  ['domain'],
+) {}

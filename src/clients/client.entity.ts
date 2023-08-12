@@ -4,11 +4,13 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   ManyToMany,
+  OneToMany,
 } from 'typeorm';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { EntityBase } from 'src/utils/entity-base';
 import { Country } from 'src/countries/country.entity';
 import { User } from 'src/users/user.entity';
+import { ClientContact } from 'src/client-contacts/client-contact.entity';
 
 @Entity()
 @ObjectType()
@@ -40,4 +42,11 @@ export class Client extends EntityBase {
   @Field(() => [User], { nullable: true })
   @ManyToMany(() => User, (user) => user.clients, { nullable: true })
   users?: User[];
+
+  @Field(() => [ClientContact], { nullable: false })
+  @OneToMany(() => ClientContact, (clientContact) => clientContact.client, {
+    nullable: false,
+    cascade: true,
+  })
+  contacts?: ClientContact[];
 }

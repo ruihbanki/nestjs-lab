@@ -6,6 +6,7 @@ import { UsersModule } from './users/users.module';
 import { ClientsModule } from './clients/clients.module';
 import { CountriesModule } from './countries/countries.module';
 import { ProductsModule } from './products/products.module';
+import { ClientContactModule } from './client-contacts/client-contact.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ProductsModule } from './products/products.module';
     UsersModule,
     CountriesModule,
     ProductsModule,
+    ClientContactModule,
   ],
   providers: [],
 })

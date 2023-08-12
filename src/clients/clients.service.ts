@@ -2,10 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsRelations, FindOptionsSelect, Repository } from 'typeorm';
 
-import { UpdateUserInput } from 'src/users/update-user.input';
-
 import { Client } from './client.entity';
 import { CreateClientInput } from './create-client.input';
+import { UpdateClientInput } from './update-client.input';
 
 interface FindClientsOptions {
   withDeleted?: boolean;
@@ -37,15 +36,20 @@ export class ClientsService {
     return await this.clientsRepository.save(client);
   }
 
-  async removeClient(id: string): Promise<boolean> {
-    const result = await this.clientsRepository.delete(id);
+  async removeClient(clientId: string): Promise<boolean> {
+    const result = await this.clientsRepository.delete(clientId);
     return result.affected > 0;
   }
 
-  async updateClient(id: string, input: UpdateUserInput): Promise<void> {
-    const result = await this.clientsRepository.update(id, input);
+  async updateClient(
+    clientId: string,
+    input: UpdateClientInput,
+  ): Promise<void> {
+    const result = await this.clientsRepository.update(clientId, input);
     if (result.affected === 0) {
-      throw new NotFoundException(`Client with the id '${id}' was not found.`);
+      throw new NotFoundException(
+        `Client with the id '${clientId}' was not found.`,
+      );
     }
   }
 }
