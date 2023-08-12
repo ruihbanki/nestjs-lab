@@ -41,6 +41,8 @@ isActive: boolean;
 
 ## Unique field
 
+- How return a better error message?
+
 ```
 @Field()
 @Column({ unique: true })

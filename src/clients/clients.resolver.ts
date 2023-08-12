@@ -14,8 +14,12 @@ export class ClientsResolver {
   constructor(private clientsService: ClientsService) {}
 
   @Query(() => Client)
-  async findClientById(@Args('id') id: string) {
-    return this.clientsService.findClientById(id);
+  async findClientById(
+    @Relations() relations: FindOptionsRelations<Client>,
+    @Select() select: FindOptionsSelect<Client>,
+    @Args('clientId') clientId: string,
+  ) {
+    return this.clientsService.findClientById(clientId, { relations, select });
   }
 
   @Query(() => [Client])
@@ -27,8 +31,12 @@ export class ClientsResolver {
   }
 
   @Mutation(() => Client)
-  async createClient(@Args('input') input: CreateClientInput) {
-    return this.clientsService.createClient(input);
+  async createClient(
+    @Relations() relations: FindOptionsRelations<Client>,
+    @Select() select: FindOptionsSelect<Client>,
+    @Args('input') input: CreateClientInput,
+  ) {
+    return this.clientsService.createClient(input, { select, relations });
   }
 
   @Mutation(() => Boolean)

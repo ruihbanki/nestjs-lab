@@ -2,14 +2,18 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsRelations, FindOptionsSelect, Repository } from 'typeorm';
 
+import { ClientContact } from 'src/client-contacts/client-contact.entity';
 import { Client } from './client.entity';
 import { CreateClientInput } from './create-client.input';
 import { UpdateClientInput } from './update-client.input';
 
-interface FindClientsOptions {
-  withDeleted?: boolean;
+interface FindOptions {
   relations?: FindOptionsRelations<Client>;
   select?: FindOptionsSelect<Client>;
+}
+
+interface FindClientsOptions extends FindOptions {
+  withDeleted?: boolean;
 }
 
 @Injectable()
@@ -17,9 +21,11 @@ export class ClientsService {
   constructor(
     @InjectRepository(Client)
     private clientsRepository: Repository<Client>,
+    @InjectRepository(ClientContact)
+    private clientContactRepository: Repository<ClientContact>,
   ) {}
 
-  findClients(options: FindClientsOptions = {}): Promise<Client[]> {
+  async findClients(options: FindClientsOptions = {}): Promise<Client[]> {
     const { relations, select, withDeleted } = options;
     return this.clientsRepository.find({
       relations,
@@ -28,12 +34,24 @@ export class ClientsService {
     });
   }
 
-  findClientById(clientId: string): Promise<Client | null> {
-    return this.clientsRepository.findOneBy({ clientId });
+  async findClientById(
+    clientId: string,
+    options: FindOptions = {},
+  ): Promise<Client | null> {
+    const { relations, select } = options;
+    return this.clientsRepository.findOne({
+      where: { clientId },
+      relations: relations,
+      select: select,
+    });
   }
 
-  async createClient(client: CreateClientInput): Promise<Client> {
-    return await this.clientsRepository.save(client);
+  async createClient(
+    input: CreateClientInput,
+    options: FindOptions = {},
+  ): Promise<Client> {
+    const client = await this.clientsRepository.save(input);
+    return this.findClientById(client.clientId, options);
   }
 
   async removeClient(clientId: string): Promise<boolean> {

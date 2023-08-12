@@ -1,13 +1,11 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
-import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { EntityBase } from 'src/utils/entity-base';
+import { Field, ObjectType } from '@nestjs/graphql';
 import { MinLength } from 'class-validator';
 import { Client } from 'src/clients/client.entity';
 
 @Entity()
 @ObjectType()
-export class ClientContact extends EntityBase {
-  @Field(() => ID)
+export class ClientContact {
   @PrimaryGeneratedColumn('uuid', { name: 'client_contact_id' })
   clientContactId: string;
 
