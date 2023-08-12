@@ -62,12 +62,14 @@ export class ClientsService {
   async updateClient(
     clientId: string,
     input: UpdateClientInput,
-  ): Promise<void> {
+    options: FindOptions = {},
+  ): Promise<Client> {
     const result = await this.clientsRepository.update(clientId, input);
     if (result.affected === 0) {
       throw new NotFoundException(
         `Client with the id '${clientId}' was not found.`,
       );
     }
+    return this.findClientById(clientId, options);
   }
 }

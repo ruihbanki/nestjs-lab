@@ -46,10 +46,14 @@ export class ClientsResolver {
 
   @Mutation(() => Client)
   async updateClient(
+    @Relations() relations: FindOptionsRelations<Client>,
+    @Select() select: FindOptionsSelect<Client>,
     @Args('clientId') clientId: string,
     @Args('input') input: UpdateClientInput,
   ) {
-    await this.clientsService.updateClient(clientId, input);
-    return this.clientsService.findClientById(clientId);
+    return this.clientsService.updateClient(clientId, input, {
+      relations,
+      select,
+    });
   }
 }
