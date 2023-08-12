@@ -40,8 +40,8 @@ export class ClientsResolver {
   }
 
   @Mutation(() => Boolean)
-  async removeClient(@Args('clientId') clientId: string) {
-    return this.clientsService.removeClient(clientId);
+  async deleteClient(@Args('clientId') clientId: string) {
+    return this.clientsService.deleteClient(clientId);
   }
 
   @Mutation(() => Client)

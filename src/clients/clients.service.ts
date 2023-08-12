@@ -54,7 +54,7 @@ export class ClientsService {
     return this.findClientById(client.clientId, options);
   }
 
-  async removeClient(clientId: string): Promise<boolean> {
+  async deleteClient(clientId: string): Promise<boolean> {
     const result = await this.clientsRepository.delete(clientId);
     return result.affected > 0;
   }

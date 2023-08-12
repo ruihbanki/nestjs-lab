@@ -9,9 +9,6 @@ export class ClientContact {
   @PrimaryGeneratedColumn('uuid', { name: 'client_contact_id' })
   clientContactId: string;
 
-  @ManyToOne(() => Client, (client) => client.contacts)
-  client: Client;
-
   @Field()
   @MinLength(3)
   @Column({ name: 'first_name' })
@@ -24,4 +21,9 @@ export class ClientContact {
   @Field()
   @Column({ name: 'phone_number' })
   phoneNumber: string;
+
+  @ManyToOne(() => Client, (client) => client.contacts, {
+    onDelete: 'CASCADE',
+  })
+  client: Client;
 }
