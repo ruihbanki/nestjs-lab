@@ -1,23 +1,17 @@
 import { Args, Query, Resolver } from '@nestjs/graphql';
-import { UsersService } from 'src/users/users.service';
 import { LoginDTO } from './login.dto';
-import * as jwt from 'jsonwebtoken';
+import { AuthService } from './auth.service';
 
 @Resolver()
 export class AuthResolver {
-  constructor(private userService: UsersService) {}
+  constructor(private authService: AuthService) {}
 
   @Query(() => LoginDTO)
   async login(
     @Args('username') username: string,
     @Args('password') password: string,
+    @Args('clientId', { nullable: true }) clientId?: string,
   ) {
-    const user = await this.userService.findUserByUsername(username);
-    const isValid = user.password === password;
-
-    const token = jwt.sign({ userId: user.userId }, 'shhhhh');
-    console.log(isValid);
-
-    return { user, token };
+    return await this.authService.login(username, password, clientId);
   }
 }

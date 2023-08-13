@@ -4,6 +4,7 @@ import {
   PrimaryGeneratedColumn,
   ManyToMany,
   JoinTable,
+  Unique,
 } from 'typeorm';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Client } from 'src/clients/client.entity';
@@ -19,7 +20,7 @@ export class User extends EntityBase {
 
   @Field()
   @IsEmail()
-  @Column()
+  @Column({ unique: true })
   username: string;
 
   @Column()
