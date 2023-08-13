@@ -8,19 +8,24 @@ import { UsersModule } from './users/users.module';
 import { ClientsModule } from './clients/clients.module';
 import { CountriesModule } from './countries/countries.module';
 import { ProductsModule } from './products/products.module';
-
-// useFactory: (configService: ConfigService) => ({
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { IAppConfigService } from './app-config.service';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      cache: true,
+    }),
     TypeOrmModule.forRootAsync({
-      useFactory: () => ({
-        type: 'postgres',
-        host: 'localhost',
-        port: 5432,
-        username: 'postgres',
-        password: 'postgres',
-        database: 'nestjs-lab',
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService<IAppConfigService>) => ({
+        type: configService.get('DATABASE_TYPE') as any,
+        host: configService.get('DATABASE_HOST'),
+        port: configService.get('DATABASE_PORT'),
+        username: configService.get('DATABASE_USERNAME'),
+        password: configService.get('DATABASE_PASSWORD'),
+        database: configService.get('DATABASE_NAME') as string,
         synchronize: true,
         autoLoadEntities: true,
         logging: true,
