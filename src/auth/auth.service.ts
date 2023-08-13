@@ -18,13 +18,13 @@ export class AuthService {
       relations: { clients: !!clientId },
     });
     if (!user) {
-      return null;
+      throw new Error('Invalid user or password');
     }
 
     // validate password
     const isValid = user.password === password;
     if (!isValid) {
-      return null;
+      throw new Error('Invalid user or password');
     }
 
     // check client
@@ -32,7 +32,7 @@ export class AuthService {
       ? user.clients?.some((c) => c.clientId === clientId)
       : true;
     if (!hasValidClient) {
-      return null;
+      throw new Error('User not associated with this client');
     }
 
     // generate token
