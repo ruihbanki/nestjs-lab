@@ -8,6 +8,7 @@ import { CountriesModule } from './countries/countries.module';
 import { ProductsModule } from './products/products.module';
 import { AppTypeormModule } from './app-typeorm.module';
 import { AppConfigModule } from './app-config.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AppConfigModule } from './app-config.module';
       driver: ApolloDriver,
       autoSchemaFile: true,
     }),
+    AuthModule,
     ClientsModule,
     UsersModule,
     CountriesModule,
