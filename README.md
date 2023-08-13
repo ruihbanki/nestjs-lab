@@ -59,6 +59,8 @@ website?: string;
 
 ## Date field
 
+- It resolves as an string yyyy-mm-dd
+
 ```
 @Field()
 @Column({ name: 'date_of_birth', type: 'date' })
@@ -66,6 +68,8 @@ dateOfBirth: string;
 ```
 
 ## Date time field
+
+- What happens when passing a date as an argument and contains or not timezone?
 
 ```
 @Field()
@@ -82,6 +86,8 @@ available: number;
 ```
 
 ## Decimal field
+
+- When passing a number with more decimals it is rounded
 
 ```
 @Field()
@@ -115,6 +121,8 @@ export abstract class EntityBase {
 export class Client extends EntityBase {
 }
 ```
+
+## Inheritance
 
 # Input
 
@@ -298,3 +306,5 @@ export class ClientsService {
 
 - How create indexes for full text search for fields like "firstName" and "lastName"? One index for each column or one for both?
 - Sort fields required indexes?
+
+# Config
