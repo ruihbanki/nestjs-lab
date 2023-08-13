@@ -1,29 +1,30 @@
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
-import { Global, Module } from '@nestjs/common';
 
-const typeOrmConnectionDataSource = new DataSource({
-  type: 'postgres',
-  host: 'localhost',
-  port: 5432,
-  username: 'postgres',
-  password: 'postgres',
-  database: 'nestjs-lab',
-  synchronize: true,
-  logging: true,
-});
+import { IAppConfigService } from './app-config.module';
 
-@Global()
 @Module({
-  imports: [],
-  providers: [
-    {
-      provide: DataSource,
-      useFactory: async () => {
-        await typeOrmConnectionDataSource.initialize();
-        return typeOrmConnectionDataSource;
+  imports: [
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService<IAppConfigService>) => ({
+        type: configService.get('DATABASE_TYPE') as any,
+        host: configService.get('DATABASE_HOST'),
+        port: configService.get('DATABASE_PORT'),
+        username: configService.get('DATABASE_USERNAME'),
+        password: configService.get('DATABASE_PASSWORD'),
+        database: configService.get('DATABASE_NAME') as string,
+        synchronize: true,
+        autoLoadEntities: true,
+        logging: true,
+      }),
+      dataSourceFactory: async (options) => {
+        return await new DataSource(options).initialize();
       },
-    },
+    }),
   ],
-  exports: [DataSource],
+  providers: [],
 })
-export class AppTypeOrmModule {}
+export class AppTypeormModule {}

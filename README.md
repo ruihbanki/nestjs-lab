@@ -308,3 +308,12 @@ export class ClientsService {
 - Sort fields required indexes?
 
 # Config
+
+```
+@Resolver(() => Client)
+export class ClientsResolver {
+  constructor(
+    private configService: ConfigService<IAppConfigService>,
+  ) {}
+}
+```
