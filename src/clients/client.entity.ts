@@ -5,6 +5,7 @@ import {
   ManyToOne,
   ManyToMany,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { EntityBase } from 'src/utils/entity-base';
@@ -37,6 +38,7 @@ export class Client extends EntityBase {
 
   @Field(() => Country)
   @ManyToOne(() => Country, { nullable: false })
+  @JoinColumn({ name: 'country_id' })
   country: Country;
 
   @Field(() => [User], { nullable: true })
