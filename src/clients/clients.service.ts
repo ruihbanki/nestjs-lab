@@ -11,6 +11,7 @@ import { Client } from './client.entity';
 import { CreateClientInput } from './create-client.input';
 import { UpdateClientInput } from './update-client.input';
 import { ClientContact } from 'src/client-contacts/client-contact.entity';
+import { ClientReportDto } from './client-report.dto';
 
 interface FindOptions {
   relations?: FindOptionsRelations<Client>;
@@ -98,5 +99,17 @@ export class ClientsService {
     });
 
     return this.findClientById(clientId, options);
+  }
+
+  async viewClientReport(): Promise<ClientReportDto[]> {
+    const rawData = await this.dataSource.manager.query(`
+      SELECT
+        C.client_id,
+        C.name
+      FROM client C
+    `);
+    console.log(rawData);
+
+    return rawData;
   }
 }

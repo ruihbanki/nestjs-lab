@@ -4,8 +4,8 @@ The goal for this project is to experiment some solutions for common scenarios u
 
 # Scripts
 
-run on http://localhost:5000/graphql
 `npm run start:dev`
+run on http://localhost:5000/graphql
 
 # Entities
 
