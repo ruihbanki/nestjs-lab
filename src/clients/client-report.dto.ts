@@ -11,5 +11,5 @@ export class ClientReportDto {
   name: string;
 
   @Field()
-  usersCount: number;
+  country_name: string;
 }

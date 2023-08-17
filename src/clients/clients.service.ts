@@ -104,9 +104,12 @@ export class ClientsService {
   async viewClientReport(): Promise<ClientReportDto[]> {
     const rawData = await this.dataSource.manager.query(`
       SELECT
-        C.client_id,
-        C.name
-      FROM client C
+        Cl.client_id,
+        Cl.name,
+        Co.name as country_name
+      FROM client Cl
+      LEFT OUTER JOIN country Co
+        ON C.country_id = Co.country_id
     `);
     console.log(rawData);
 
