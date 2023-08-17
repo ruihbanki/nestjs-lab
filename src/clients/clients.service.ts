@@ -11,7 +11,7 @@ import { Client } from './client.entity';
 import { CreateClientInput } from './create-client.input';
 import { UpdateClientInput } from './update-client.input';
 import { ClientContact } from 'src/client-contacts/client-contact.entity';
-import { ClientReportDto } from './client-report.dto';
+import { ClientReport } from './client-report.dto';
 
 interface FindOptions {
   relations?: FindOptionsRelations<Client>;
@@ -101,18 +101,16 @@ export class ClientsService {
     return this.findClientById(clientId, options);
   }
 
-  async viewClientReport(): Promise<ClientReportDto[]> {
+  async viewClientReport(): Promise<ClientReport[]> {
     const rawData = await this.dataSource.manager.query(`
       SELECT
-        Cl.client_id,
-        Cl.name,
-        Co.name as country_name
+        Cl.client_id as "clientId",
+        Cl.name as "clientName",
+        Co.name as "countryName"
       FROM client Cl
       LEFT OUTER JOIN country Co
-        ON C.country_id = Co.country_id
+        ON Cl.country_id = Co.country_id
     `);
-    console.log(rawData);
-
     return rawData;
   }
 }

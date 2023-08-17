@@ -8,7 +8,7 @@ import { ClientsService } from './clients.service';
 import { Client } from './client.entity';
 import { CreateClientInput } from './create-client.input';
 import { UpdateClientInput } from './update-client.input';
-import { ClientReportDto } from './client-report.dto';
+import { ClientReport } from './client-report.dto';
 
 @Resolver(() => Client)
 export class ClientsResolver {
@@ -58,7 +58,7 @@ export class ClientsResolver {
     });
   }
 
-  @Query(() => [ClientReportDto])
+  @Query(() => [ClientReport])
   async viewClientsReport() {
     return this.clientsService.viewClientReport();
   }

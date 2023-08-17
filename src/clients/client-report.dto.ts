@@ -3,13 +3,13 @@ import { Field, ID, ObjectType } from '@nestjs/graphql';
 
 @Entity()
 @ObjectType()
-export class ClientReportDto {
+export class ClientReport {
   @Field(() => ID)
   clientId: string;
 
   @Field()
-  name: string;
+  clientName: string;
 
   @Field()
-  country_name: string;
+  countryName: string;
 }
