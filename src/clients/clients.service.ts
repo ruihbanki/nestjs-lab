@@ -102,7 +102,8 @@ export class ClientsService {
   }
 
   async viewClientReport(): Promise<ClientReport[]> {
-    const rawData = await this.dataSource.manager.query(`
+    const rawData = await this.dataSource.query(
+      `
       SELECT
         Cl.client_id as "clientId",
         Cl.name as "clientName",
@@ -110,7 +111,11 @@ export class ClientsService {
       FROM client Cl
       LEFT OUTER JOIN country Co
         ON Cl.country_id = Co.country_id
-    `);
+      WHERE
+        Cl.is_active = $1
+    `,
+      [true],
+    );
     return rawData;
   }
 }
