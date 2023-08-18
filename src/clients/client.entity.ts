@@ -12,6 +12,7 @@ import { EntityBase } from 'src/utils/entity-base';
 import { Country } from 'src/countries/country.entity';
 import { User } from 'src/users/user.entity';
 import { ClientContact } from 'src/client-contacts/client-contact.entity';
+import { trimMiddleware } from 'src/utils/trim.middleware';
 
 @Entity()
 @ObjectType()
@@ -20,7 +21,7 @@ export class Client extends EntityBase {
   @PrimaryGeneratedColumn('uuid', { name: 'client_id' })
   clientId: string;
 
-  @Field()
+  @Field({ middleware: [trimMiddleware] })
   @Column()
   name: string;
 
