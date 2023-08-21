@@ -10,7 +10,7 @@ import {
 import { Client } from './client.entity';
 import { CreateClientInput } from './create-client.input';
 import { UpdateClientInput } from './update-client.input';
-import { ClientContact } from 'src/client-contacts/client-contact.entity';
+import { ClientContact } from 'src/modules/client-contacts/client-contact.entity';
 import { ClientReport } from './client-report.dto';
 
 interface FindOptions {

@@ -1,6 +1,6 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { MinLength } from 'class-validator';
-import { CountryInput } from 'src/countries/country.input';
+import { CountryInput } from 'src/modules/countries/country.input';
 
 @InputType()
 export class CreateClientInput {

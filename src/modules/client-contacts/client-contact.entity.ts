@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { MinLength } from 'class-validator';
-import { Client } from 'src/clients/client.entity';
+import { Client } from 'src/modules/clients/client.entity';
 
 @Entity()
 @ObjectType()

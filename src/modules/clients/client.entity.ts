@@ -9,9 +9,9 @@ import {
 } from 'typeorm';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { EntityBase } from 'src/utils/entity-base';
-import { Country } from 'src/countries/country.entity';
-import { User } from 'src/users/user.entity';
-import { ClientContact } from 'src/client-contacts/client-contact.entity';
+import { Country } from 'src/modules/countries/country.entity';
+import { User } from 'src/modules/users/user.entity';
+import { ClientContact } from 'src/modules/client-contacts/client-contact.entity';
 import { Trim } from 'src/utils/trim.decorator';
 
 @Entity()

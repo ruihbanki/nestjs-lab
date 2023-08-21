@@ -1,4 +1,4 @@
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from 'src/modules/users/users.service';
 import * as jwt from 'jsonwebtoken';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';

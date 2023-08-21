@@ -2,13 +2,13 @@ import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 
-import { UsersModule } from './users/users.module';
-import { ClientsModule } from './clients/clients.module';
-import { CountriesModule } from './countries/countries.module';
-import { ProductsModule } from './products/products.module';
+import { UsersModule } from './modules/users/users.module';
+import { ClientsModule } from './modules/clients/clients.module';
+import { CountriesModule } from './modules/countries/countries.module';
+import { ProductsModule } from './modules/products/products.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { AppTypeormModule } from './app-typeorm.module';
 import { AppConfigModule } from './app-config.module';
-import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [

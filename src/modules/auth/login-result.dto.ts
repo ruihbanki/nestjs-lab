@@ -1,5 +1,5 @@
 import { Field, ObjectType, createUnionType } from '@nestjs/graphql';
-import { User } from 'src/users/user.entity';
+import { User } from 'src/modules/users/user.entity';
 
 @ObjectType()
 export class LoginDTO {
