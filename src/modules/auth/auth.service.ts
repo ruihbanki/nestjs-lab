@@ -1,14 +1,12 @@
 import { UsersService } from 'src/modules/users/users.service';
 import * as jwt from 'jsonwebtoken';
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-
-import { IAppConfigService } from 'src/app-config.module';
+import { ConfigService } from '../config/config.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private configService: ConfigService<IAppConfigService>,
+    private configService: ConfigService,
     private userService: UsersService,
   ) {}
 

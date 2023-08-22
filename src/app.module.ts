@@ -8,11 +8,11 @@ import { CountriesModule } from './modules/countries/countries.module';
 import { ProductsModule } from './modules/products/products.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { AppTypeormModule } from './app-typeorm.module';
-import { AppConfigModule } from './app-config.module';
+import { ConfigModule } from './modules/config/config.module';
 
 @Module({
   imports: [
-    AppConfigModule,
+    ConfigModule,
     AppTypeormModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
