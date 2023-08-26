@@ -18,17 +18,14 @@ export class AuthResolver {
     @Relations() relations?: FindOptionsRelations<LoginDTO>,
   ) {
     try {
-      const result = await this.authService.login(
+      return await this.authService.login(
         username,
         password,
         clientId,
         relations,
       );
-      return new LoginDTO(result.user, result.token);
     } catch (error) {
-      console.log(error);
-
-      return new UnauthorizedException('Invalid username or password');
+      return new UnauthorizedException(error);
     }
   }
 }

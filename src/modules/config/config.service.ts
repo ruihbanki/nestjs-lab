@@ -9,7 +9,7 @@ export interface AppVariable {
   DATABASE_USERNAME: string;
   DATABASE_PASSWORD: string;
   DATABASE_NAME: string;
-  AUTH_TOKEN_KEY: string;
+  JWT_SECRET_KEY: string;
 }
 
 @Injectable()

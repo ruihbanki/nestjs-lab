@@ -44,7 +44,7 @@ export class AuthService {
       ? user.clients?.some((c) => c.clientId === clientId)
       : true;
     if (!hasValidClient) {
-      throw new Error('User not associated with this client');
+      throw new Error('User is not associated with this client');
     }
 
     // generate token
