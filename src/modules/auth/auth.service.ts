@@ -1,31 +1,45 @@
 import { UsersService } from 'src/modules/users/users.service';
-import * as jwt from 'jsonwebtoken';
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '../config/config.service';
+import { JwtService } from '@nestjs/jwt';
+import { AuthPayload } from './auth.types';
+import { FindOptionsRelations } from 'typeorm';
+import { User } from '../users/user.entity';
+import { LoginDTO } from './login-result.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private configService: ConfigService,
     private userService: UsersService,
+    private jwtService: JwtService,
   ) {}
 
-  async login(username: string, password: string, clientId?: string) {
+  async login(
+    username: string,
+    password: string,
+    clientId?: string,
+    relations?: FindOptionsRelations<LoginDTO>,
+  ) {
     // get user
+    const userRelations =
+      typeof relations?.user === 'object' ? relations?.user : undefined;
     const user = await this.userService.findUserByUsername(username, {
-      relations: { clients: !!clientId },
+      relations: {
+        ...userRelations,
+        clients: !!clientId || userRelations?.clients,
+      },
     });
     if (!user) {
       throw new Error('Invalid user or password');
     }
 
     // validate password
-    const isValid = user.password === password;
-    if (!isValid) {
+    // TODO the password must be a hash
+    const isValidPassword = user.password === password;
+    if (!isValidPassword) {
       throw new Error('Invalid user or password');
     }
 
-    // check client
+    // check if user is associated with the client
     const hasValidClient = !!clientId
       ? user.clients?.some((c) => c.clientId === clientId)
       : true;
@@ -34,10 +48,12 @@ export class AuthService {
     }
 
     // generate token
-    const tokenKey = this.configService.get('AUTH_TOKEN_KEY');
-    const token = jwt.sign({ userId: user.userId }, tokenKey);
+    const payload: AuthPayload = {
+      clientId,
+      userId: user.userId,
+    };
+    const token = await this.jwtService.signAsync(payload);
 
-    // return
     return { user, token };
   }
 }

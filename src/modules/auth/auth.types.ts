@@ -1,8 +1,4 @@
-export interface IAuthUserTokenPayload {
-  userId: string;
-}
-
-export interface IAuthClientUserTokenPayload {
-  clientId: string;
-  userId: string;
+export interface AuthPayload {
+  clientId?: string;
+  userId?: string;
 }

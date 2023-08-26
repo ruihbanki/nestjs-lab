@@ -1,4 +1,4 @@
-import { Field, ObjectType, createUnionType } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 import { User } from 'src/modules/users/user.entity';
 
 @ObjectType()
@@ -14,18 +14,3 @@ export class LoginDTO {
   @Field()
   token: string;
 }
-
-@ObjectType()
-export class ErrorDTO {
-  constructor(message: string) {
-    this.message = message;
-  }
-
-  @Field()
-  message: string;
-}
-
-export const LoginResultDTO = createUnionType({
-  name: 'LoginResultDTO',
-  types: () => [LoginDTO, ErrorDTO] as const,
-});
