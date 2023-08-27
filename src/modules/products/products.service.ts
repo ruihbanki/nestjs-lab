@@ -36,8 +36,6 @@ export class ProductsService {
   }
 
   async createProduct(product: CreateProductDto): Promise<Product> {
-    console.log({ product });
-
     return await this.ProductsRepository.save(product);
   }
 
