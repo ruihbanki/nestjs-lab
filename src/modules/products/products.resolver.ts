@@ -9,6 +9,7 @@ import { Product } from './product.entity';
 import { CreateProductInput } from './create-product.input';
 import { UpdateProductInput } from './update-product.input';
 import { FindProductsArgs } from './find-products.args';
+import { AuthPayload } from '../auth/auth-payload.decorator';
 
 @Resolver(() => Product)
 export class ProductsResolver {
@@ -21,12 +22,13 @@ export class ProductsResolver {
 
   @Query(() => [Product])
   async findProducts(
+    @AuthPayload('clientId') clientId: string,
     @Relations() relations: FindOptionsRelations<Product>,
     @Select() select: FindOptionsSelect<Product>,
     @Args() args?: FindProductsArgs,
   ) {
     const { withDeleted } = args;
-    return this.productsService.findProducts({
+    return this.productsService.findProducts(clientId, {
       withDeleted,
       relations,
       select,

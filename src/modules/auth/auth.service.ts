@@ -3,7 +3,6 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthPayload } from './auth.types';
 import { FindOptionsRelations } from 'typeorm';
-import { User } from '../users/user.entity';
 import { LoginDTO } from './login-result.dto';
 
 @Injectable()

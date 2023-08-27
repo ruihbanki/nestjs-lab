@@ -19,7 +19,10 @@ export class ProductsService {
     private ProductsRepository: Repository<Product>,
   ) {}
 
-  findProducts(options: FindProductsOptions = {}): Promise<Product[]> {
+  findProducts(
+    clientId: string,
+    options: FindProductsOptions = {},
+  ): Promise<Product[]> {
     const { relations, select, withDeleted } = options;
     return this.ProductsRepository.find({
       relations,
