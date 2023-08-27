@@ -5,6 +5,8 @@ import { AuthResolver } from './auth.resolver';
 import { AuthService } from './auth.service';
 import { ConfigModule } from '../config/config.module';
 import { ConfigService } from '../config/config.service';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './auth.guard';
 
 @Module({
   imports: [
@@ -20,6 +22,13 @@ import { ConfigService } from '../config/config.service';
     }),
     UsersModule,
   ],
-  providers: [AuthResolver, AuthService],
+  providers: [
+    AuthResolver,
+    AuthService,
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
 })
 export class AuthModule {}
