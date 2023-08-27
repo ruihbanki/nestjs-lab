@@ -36,8 +36,16 @@ export class ProductsResolver {
   }
 
   @Mutation(() => Product)
-  async createProduct(@Args('input') input: CreateProductInput) {
-    return this.productsService.createProduct(input);
+  async createProduct(
+    @AuthPayload('clientId') clientId: string,
+    @Args('input') input: CreateProductInput,
+  ) {
+    return this.productsService.createProduct({
+      ...input,
+      client: {
+        clientId,
+      },
+    });
   }
 
   @Mutation(() => Product)

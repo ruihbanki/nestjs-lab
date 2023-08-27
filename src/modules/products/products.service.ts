@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsRelations, FindOptionsSelect, Repository } from 'typeorm';
 
 import { Product } from './product.entity';
-import { CreateProductInput } from './create-product.input';
 import { UpdateProductInput } from './update-product.input';
+import { CreateProductDto } from './create-product.dto';
 
 interface FindProductsOptions {
   withDeleted?: boolean;
@@ -35,7 +35,9 @@ export class ProductsService {
     return this.ProductsRepository.findOneBy({ productId });
   }
 
-  async createProduct(product: CreateProductInput): Promise<Product> {
+  async createProduct(product: CreateProductDto): Promise<Product> {
+    console.log({ product });
+
     return await this.ProductsRepository.save(product);
   }
 
