@@ -55,4 +55,12 @@ export class AuthService {
 
     return { user, token };
   }
+
+  async generateClientToken(clientId: string) {
+    const payload: AuthPayload = {
+      clientId,
+    };
+    const token = await this.jwtService.signAsync(payload);
+    return { token };
+  }
 }

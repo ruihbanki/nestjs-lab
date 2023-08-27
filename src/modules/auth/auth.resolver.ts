@@ -1,10 +1,11 @@
-import { Args, Query, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { FindOptionsRelations } from 'typeorm';
 
 import { AuthService } from './auth.service';
 import { Relations } from 'src/utils/relations.decorator';
 import { LoginDTO } from './login-result.dto';
 import { UnauthorizedException } from '@nestjs/common';
+import { ClientTokenDTO } from './client-token.dto copy';
 
 @Resolver()
 export class AuthResolver {
@@ -27,5 +28,10 @@ export class AuthResolver {
     } catch (error) {
       return new UnauthorizedException(error);
     }
+  }
+
+  @Mutation(() => ClientTokenDTO)
+  generateClientToken(@Args('clientId') clientId: string) {
+    return this.authService.generateClientToken(clientId);
   }
 }

@@ -17,6 +17,7 @@ import { ConfigModule } from './modules/config/config.module';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: true,
+      sortSchema: true,
     }),
     AuthModule,
     ClientsModule,
