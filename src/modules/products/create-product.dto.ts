@@ -7,4 +7,6 @@ export class CreateProductDto {
   price: number;
 
   available: number;
+
+  categories: { productCategoryId: string }[];
 }

@@ -10,4 +10,13 @@ export class CreateProductInput {
 
   @Field()
   available: number;
+
+  @Field(() => [CategoryInput])
+  categories: CategoryInput[];
+}
+
+@InputType()
+class CategoryInput {
+  @Field()
+  productCategoryId: string;
 }
