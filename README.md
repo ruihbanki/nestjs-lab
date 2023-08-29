@@ -112,22 +112,42 @@ export class Client extends EntityBase {
 
 ## Many to many with both sides
 
+- insert categories when creating a product
+- delete categories when deleting a product
+- updating a product with categories is not working
+
 ```
 @Entity()
 @ObjectType()
-export class Client {
-  @Field(() => [User], { nullable: true })
-  @ManyToMany(() => User, (user) => user.clients, { nullable: true })
-  users?: User[];
+export class Product {
+  @Field(() => [ProductCategory], { nullable: true })
+  @ManyToMany(
+    () => ProductCategory,
+    (productCategory) => productCategory.products,
+    { nullable: true },
+  )
+  @JoinTable({
+    name: 'product_product_category',
+    joinColumn: {
+      name: 'product_id',
+      referencedColumnName: 'productId',
+    },
+    inverseJoinColumn: {
+      name: 'product_category_id',
+      referencedColumnName: 'productCategoryId',
+    },
+  })
+  categories?: ProductCategory[];
 }
 
 @Entity()
 @ObjectType()
-export class User {
-  @Field(() => [Client], { nullable: true })
-  @ManyToMany(() => Client, (client) => client.users, { nullable: true })
-  @JoinTable()
-  clients?: Client[];
+export class ProductCategory {
+  @Field(() => [Product], { nullable: true })
+  @ManyToMany(() => Product, (product) => product.categories, {
+    nullable: true,
+  })
+  products: Product[];
 }
 ```
 
@@ -290,14 +310,13 @@ private dataSource: DataSource,
 ) {}
 
 async viewClientReport(): Promise<ClientReport[]> {
-const rawData = await this.dataSource.manager.query(`     SELECT
+const rawData = await this.dataSource.manager.query(`  SELECT
         Cl.client_id as "clientId",
         Cl.name as "clientName",
         Co.name as "countryName"
       FROM client Cl
       LEFT OUTER JOIN country Co
-        ON Cl.country_id = Co.country_id
-  `);
+        ON Cl.country_id = Co.country_id`);
 return rawData;
 }
 }
