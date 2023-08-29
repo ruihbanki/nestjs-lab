@@ -6,6 +6,7 @@ import {
   ManyToMany,
   OneToMany,
   JoinColumn,
+  JoinTable,
 } from 'typeorm';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { EntityBase } from 'src/utils/entity-base';
@@ -45,6 +46,17 @@ export class Client extends EntityBase {
 
   @Field(() => [User], { nullable: true })
   @ManyToMany(() => User, (user) => user.clients, { nullable: true })
+  @JoinTable({
+    name: 'client_user',
+    joinColumn: {
+      name: 'client_id',
+      referencedColumnName: 'clientId',
+    },
+    inverseJoinColumn: {
+      name: 'user_id',
+      referencedColumnName: 'userId',
+    },
+  })
   users?: User[];
 
   @Field(() => [ClientContact], { nullable: false })

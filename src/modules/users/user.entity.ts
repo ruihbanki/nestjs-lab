@@ -1,11 +1,4 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  ManyToMany,
-  JoinTable,
-  Unique,
-} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToMany } from 'typeorm';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Client } from 'src/modules/clients/client.entity';
 import { IsEmail, MinLength } from 'class-validator';
@@ -49,6 +42,5 @@ export class User extends EntityBase {
 
   @Field(() => [Client], { nullable: true })
   @ManyToMany(() => Client, (client) => client.users, { nullable: true })
-  @JoinTable()
   clients?: Client[];
 }

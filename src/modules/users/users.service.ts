@@ -55,6 +55,10 @@ export class UsersService {
     });
   }
 
+  associateUser(clientId: string, userId: string) {
+    console.log(clientId, userId);
+  }
+
   async createSuperUser(input: CreateUserInput): Promise<User> {
     const user = {
       ...input,

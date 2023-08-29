@@ -60,4 +60,12 @@ export class UsersResolver {
   async softDeleteUser(@Args('id') id: string) {
     return this.usersService.softDelete(id);
   }
+
+  @Mutation(() => Boolean)
+  async associateUser(
+    @Args('clientId') clientId: string,
+    @Args('userId') userId: string,
+  ) {
+    return this.usersService.associateUser(clientId, userId);
+  }
 }
