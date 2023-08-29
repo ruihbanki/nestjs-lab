@@ -25,14 +25,23 @@ export class ProductsService {
   ): Promise<Product[]> {
     const { relations, select, withDeleted } = options;
     return this.ProductsRepository.find({
+      where: {
+        client: { clientId },
+      },
       relations,
       select,
       withDeleted,
     });
   }
 
-  findProductById(productId: string): Promise<Product | null> {
-    return this.ProductsRepository.findOneBy({ productId });
+  findProductById(
+    clientId: string,
+    productId: string,
+  ): Promise<Product | null> {
+    return this.ProductsRepository.findOneBy({
+      productId,
+      client: { clientId },
+    });
   }
 
   async createProduct(product: CreateProductDto): Promise<Product> {

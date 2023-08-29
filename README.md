@@ -95,149 +95,6 @@ available: number;
 price: number;
 ```
 
-## Entity base
-
-Extend this class to enable creating and update of some columns
-
-```
-@ObjectType()
-@Entity()
-export abstract class EntityBase {
-  @Field()
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt?: Date;
-
-  @Field({ nullable: true })
-  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
-  deletedAt?: Date;
-
-  @Field()
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt?: Date;
-}
-
-@Entity()
-@ObjectType()
-export class Client extends EntityBase {
-}
-```
-
-## Inheritance
-
-# Input
-
-# CRUD
-
-## Create
-
-## Update
-
-## Delete
-
-# Find
-
-- return entities and usually use the typeorm find method
-- can have nested entities
-
-## Pagination
-
-### Offset pagination
-
-### Cursor pagination
-
-## Sort
-
-# View
-
-- Not required to use a database view
-- Does not return entities, returns DTOs instead
-- Usually implemented with custom sql
-
-```
-@Entity()
-@ObjectType()
-export class ClientReport {
-  @Field(() => ID)
-  clientId: string;
-
-  @Field()
-  clientName: string;
-
-  @Field()
-  countryName: string;
-}
-
-@Injectable()
-export class ClientsService {
-  constructor(
-    @InjectDataSource()
-    private dataSource: DataSource,
-  ) {}
-
-  async viewClientReport(): Promise<ClientReport[]> {
-    const rawData = await this.dataSource.manager.query(`
-      SELECT
-        Cl.client_id as "clientId",
-        Cl.name as "clientName",
-        Co.name as "countryName"
-      FROM client Cl
-      LEFT OUTER JOIN country Co
-        ON Cl.country_id = Co.country_id
-    `);
-    return rawData;
-  }
-}
-
-@Resolver(() => Client)
-export class ClientsResolver {
-  constructor(private clientsService: ClientsService) {}
-
-  @Query(() => [ClientReport])
-  async viewClientsReport() {
-    return this.clientsService.viewClientReport();
-  }
-}
-
-```
-
-# Relations decorator
-
-Use the custom @Relations decorator to return the relations to be used in the find method. It gets this using the graphql info. E.g. { clients: true }.
-
-```
-@Resolver(() => User)
-export class UsersResolver {
-  constructor(private usersService: UsersService) {}
-
-  @Query(() => [User])
-  async findUsers(
-    @Relations() relations: FindOptionsRelations<User>,
-  ) {
-    return this.usersService.findUsers({ relations });
-  }
-}
-
-```
-
-# Select decorator
-
-Use the custom @Select decorator to return only the required query fields. E.g. { name: true, client: { id:true }}.
-
-```
-@Resolver(() => User)
-export class UsersResolver {
-  constructor(private usersService: UsersService) {}
-
-  @Query(() => [User])
-  async findUsers(
-    @Select() select: FindOptionsSelect<User>,
-  ) {
-    return this.usersService.findUsers({ select });
-  }
-}
-
-```
-
 # Relations
 
 ## Many to one
@@ -248,6 +105,7 @@ export class UsersResolver {
 export class Client extends EntityBase {
   @Field(() => Country)
   @ManyToOne(() => Country, { nullable: false })
+  @JoinColumn({ name: 'country_id' })
   country: Country;
 }
 ```
@@ -348,6 +206,154 @@ export class ClientsService {
     return this.findClientById(clientId, options);
   }
 }
+
+## Entity base
+
+Extend this class to enable creating and update of some columns
+
+```
+
+@ObjectType()
+@Entity()
+export abstract class EntityBase {
+@Field()
+@CreateDateColumn({ name: 'created_at' })
+createdAt?: Date;
+
+@Field({ nullable: true })
+@DeleteDateColumn({ name: 'deleted_at', nullable: true })
+deletedAt?: Date;
+
+@Field()
+@UpdateDateColumn({ name: 'updated_at' })
+updatedAt?: Date;
+}
+
+@Entity()
+@ObjectType()
+export class Client extends EntityBase {
+}
+
+```
+
+## Inheritance
+
+# Input
+
+# CRUD
+
+## Create
+
+## Update
+
+## Delete
+
+# Find
+
+- return entities and usually use the typeorm find method
+- can have nested entities
+
+## Pagination
+
+### Offset pagination
+
+### Cursor pagination
+
+## Sort
+
+# View
+
+- Not required to use a database view
+- Does not return entities, returns DTOs instead
+- Usually implemented with custom sql
+
+```
+
+@Entity()
+@ObjectType()
+export class ClientReport {
+@Field(() => ID)
+clientId: string;
+
+@Field()
+clientName: string;
+
+@Field()
+countryName: string;
+}
+
+@Injectable()
+export class ClientsService {
+constructor(
+@InjectDataSource()
+private dataSource: DataSource,
+) {}
+
+async viewClientReport(): Promise<ClientReport[]> {
+const rawData = await this.dataSource.manager.query(`     SELECT
+        Cl.client_id as "clientId",
+        Cl.name as "clientName",
+        Co.name as "countryName"
+      FROM client Cl
+      LEFT OUTER JOIN country Co
+        ON Cl.country_id = Co.country_id
+  `);
+return rawData;
+}
+}
+
+@Resolver(() => Client)
+export class ClientsResolver {
+constructor(private clientsService: ClientsService) {}
+
+@Query(() => [ClientReport])
+async viewClientsReport() {
+return this.clientsService.viewClientReport();
+}
+}
+
+```
+
+# Relations decorator
+
+Use the custom @Relations decorator to return the relations to be used in the find method. It gets this using the graphql info. E.g. { clients: true }.
+
+```
+
+@Resolver(() => User)
+export class UsersResolver {
+constructor(private usersService: UsersService) {}
+
+@Query(() => [User])
+async findUsers(
+@Relations() relations: FindOptionsRelations<User>,
+) {
+return this.usersService.findUsers({ relations });
+}
+}
+
+```
+
+# Select decorator
+
+Use the custom @Select decorator to return only the required query fields. E.g. { name: true, client: { id:true }}.
+
+```
+
+@Resolver(() => User)
+export class UsersResolver {
+constructor(private usersService: UsersService) {}
+
+@Query(() => [User])
+async findUsers(
+@Select() select: FindOptionsSelect<User>,
+) {
+return this.usersService.findUsers({ select });
+}
+}
+
+```
+
 
 ```
 

@@ -16,8 +16,11 @@ export class ProductsResolver {
   constructor(private productsService: ProductsService) {}
 
   @Query(() => Product)
-  async findProductById(@Args('id') id: string) {
-    return this.productsService.findProductById(id);
+  async findProductById(
+    @AuthPayload('clientId') clientId: string,
+    @Args('id') id: string,
+  ) {
+    return this.productsService.findProductById(clientId, id);
   }
 
   @Query(() => [Product])
@@ -50,11 +53,12 @@ export class ProductsResolver {
 
   @Mutation(() => Product)
   async updateProduct(
+    @AuthPayload('clientId') clientId: string,
     @Args('id') id: string,
     @Args('input') input: UpdateProductInput,
   ) {
     await this.productsService.updateProduct(id, input);
-    return this.productsService.findProductById(id);
+    return this.productsService.findProductById(clientId, id);
   }
 
   @Mutation(() => Boolean)
