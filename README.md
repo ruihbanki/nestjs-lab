@@ -112,22 +112,42 @@ export class Client extends EntityBase {
 
 ## Many to many with both sides
 
+- insert categories when creating a product
+- delete categories when deleting a product
+- updating a product with categories is not working
+
 ```
 @Entity()
 @ObjectType()
-export class Client {
-  @Field(() => [User], { nullable: true })
-  @ManyToMany(() => User, (user) => user.clients, { nullable: true })
-  users?: User[];
+export class Product {
+  @Field(() => [ProductCategory], { nullable: true })
+  @ManyToMany(
+    () => ProductCategory,
+    (productCategory) => productCategory.products,
+    { nullable: true },
+  )
+  @JoinTable({
+    name: 'product_product_category',
+    joinColumn: {
+      name: 'product_id',
+      referencedColumnName: 'productId',
+    },
+    inverseJoinColumn: {
+      name: 'product_category_id',
+      referencedColumnName: 'productCategoryId',
+    },
+  })
+  categories?: ProductCategory[];
 }
 
 @Entity()
 @ObjectType()
-export class User {
-  @Field(() => [Client], { nullable: true })
-  @ManyToMany(() => Client, (client) => client.users, { nullable: true })
-  @JoinTable()
-  clients?: Client[];
+export class ProductCategory {
+  @Field(() => [Product], { nullable: true })
+  @ManyToMany(() => Product, (product) => product.categories, {
+    nullable: true,
+  })
+  products: Product[];
 }
 ```
 
@@ -206,32 +226,33 @@ export class ClientsService {
     return this.findClientById(clientId, options);
   }
 }
+```
 
 ## Entity base
 
 Extend this class to enable creating and update of some columns
 
 ```
-
 @ObjectType()
 @Entity()
 export abstract class EntityBase {
-@Field()
-@CreateDateColumn({ name: 'created_at' })
-createdAt?: Date;
+  @Field()
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt?: Date;
 
-@Field({ nullable: true })
-@DeleteDateColumn({ name: 'deleted_at', nullable: true })
-deletedAt?: Date;
+  @Field({ nullable: true })
+  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
+  deletedAt?: Date;
 
-@Field()
-@UpdateDateColumn({ name: 'updated_at' })
-updatedAt?: Date;
+  @Field()
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt?: Date;
 }
 
 @Entity()
 @ObjectType()
 export class Client extends EntityBase {
+  ...
 }
 
 ```
@@ -268,48 +289,47 @@ export class Client extends EntityBase {
 - Usually implemented with custom sql
 
 ```
-
 @Entity()
 @ObjectType()
 export class ClientReport {
-@Field(() => ID)
-clientId: string;
+  @Field(() => ID)
+  clientId: string;
 
-@Field()
-clientName: string;
+  @Field()
+  clientName: string;
 
-@Field()
-countryName: string;
-}
+  @Field()
+  countryName: string;
+  }
 
-@Injectable()
-export class ClientsService {
-constructor(
-@InjectDataSource()
-private dataSource: DataSource,
-) {}
+  @Injectable()
+  export class ClientsService {
+    constructor(
+    @InjectDataSource()
+      private dataSource: DataSource,
+    ) {}
 
-async viewClientReport(): Promise<ClientReport[]> {
-const rawData = await this.dataSource.manager.query(`     SELECT
+    async viewClientReport(): Promise<ClientReport[]> {
+    const rawData = await this.dataSource.manager.query(`
+      SELECT
         Cl.client_id as "clientId",
         Cl.name as "clientName",
         Co.name as "countryName"
       FROM client Cl
       LEFT OUTER JOIN country Co
-        ON Cl.country_id = Co.country_id
-  `);
-return rawData;
-}
+        ON Cl.country_id = Co.country_id`);
+      return rawData;
+    }
 }
 
 @Resolver(() => Client)
 export class ClientsResolver {
-constructor(private clientsService: ClientsService) {}
+  constructor(private clientsService: ClientsService) {}
 
-@Query(() => [ClientReport])
-async viewClientsReport() {
-return this.clientsService.viewClientReport();
-}
+  @Query(() => [ClientReport])
+  async viewClientsReport() {
+    return this.clientsService.viewClientReport();
+  }
 }
 
 ```
@@ -322,14 +342,14 @@ Use the custom @Relations decorator to return the relations to be used in the fi
 
 @Resolver(() => User)
 export class UsersResolver {
-constructor(private usersService: UsersService) {}
+  constructor(private usersService: UsersService) {}
 
-@Query(() => [User])
-async findUsers(
-@Relations() relations: FindOptionsRelations<User>,
-) {
-return this.usersService.findUsers({ relations });
-}
+  @Query(() => [User])
+  async findUsers(
+  @Relations() relations: FindOptionsRelations<User>,
+  ) {
+    return this.usersService.findUsers({ relations });
+  }
 }
 
 ```
@@ -342,18 +362,17 @@ Use the custom @Select decorator to return only the required query fields. E.g. 
 
 @Resolver(() => User)
 export class UsersResolver {
-constructor(private usersService: UsersService) {}
+  constructor(private usersService: UsersService) {}
 
-@Query(() => [User])
-async findUsers(
-@Select() select: FindOptionsSelect<User>,
-) {
-return this.usersService.findUsers({ select });
-}
+  @Query(() => [User])
+  async findUsers(
+  @Select() select: FindOptionsSelect<User>,
+  ) {
+    return this.usersService.findUsers({ select });
+  }
 }
 
 ```
-
 
 ```
 
@@ -372,10 +391,14 @@ return this.usersService.findUsers({ select });
 # Config
 
 ```
+
 @Resolver(() => Client)
 export class ClientsResolver {
-  constructor(
-    private configService: ConfigService<IAppConfigService>,
-  ) {}
+constructor(
+private configService: ConfigService<IAppConfigService>,
+) {}
 }
+
+```
+
 ```
