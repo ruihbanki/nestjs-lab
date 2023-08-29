@@ -7,8 +7,4 @@ export class CreateProductDto {
   price: number;
 
   available: number;
-
-  client: {
-    clientId: string;
-  };
 }

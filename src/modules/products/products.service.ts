@@ -19,7 +19,7 @@ export class ProductsService {
     private ProductsRepository: Repository<Product>,
   ) {}
 
-  findProducts(
+  async findProducts(
     clientId: string,
     options: FindProductsOptions = {},
   ): Promise<Product[]> {
@@ -34,35 +34,73 @@ export class ProductsService {
     });
   }
 
-  findProductById(
+  async findProductById(
     clientId: string,
     productId: string,
+    options: FindProductsOptions = {},
   ): Promise<Product | null> {
-    return this.ProductsRepository.findOneBy({
-      productId,
-      client: { clientId },
+    const { relations, select, withDeleted } = options;
+    return this.ProductsRepository.findOne({
+      where: {
+        productId,
+        client: { clientId },
+      },
+      relations,
+      select,
+      withDeleted,
     });
   }
 
-  async createProduct(product: CreateProductDto): Promise<Product> {
-    return await this.ProductsRepository.save(product);
+  async createProduct(
+    clientId: string,
+    productDto: CreateProductDto,
+  ): Promise<Product> {
+    const product = await this.ProductsRepository.save({
+      ...productDto,
+      client: {
+        clientId,
+      },
+    });
+    return this.findProductById(clientId, product.productId);
   }
 
-  async deleteProduct(productId: string): Promise<boolean> {
-    const result = await this.ProductsRepository.delete(productId);
+  async deleteProduct(clientId: string, productId: string): Promise<boolean> {
+    const result = await this.ProductsRepository.delete({
+      productId,
+      client: {
+        clientId,
+      },
+    });
     return result.affected > 0;
   }
 
-  async softDeleteProduct(productId: string): Promise<boolean> {
-    const result = await this.ProductsRepository.softDelete(productId);
+  async softDeleteProduct(
+    clientId: string,
+    productId: string,
+  ): Promise<boolean> {
+    const result = await this.ProductsRepository.softDelete({
+      productId,
+      client: {
+        clientId,
+      },
+    });
     return result.affected > 0;
   }
 
   async updateProduct(
+    clientId: string,
     productId: string,
     input: UpdateProductInput,
   ): Promise<void> {
-    const result = await this.ProductsRepository.update(productId, input);
+    const result = await this.ProductsRepository.update(
+      {
+        productId,
+        client: {
+          clientId,
+        },
+      },
+      input,
+    );
     if (result.affected === 0) {
       throw new NotFoundException(
         `Product with the productId '${productId}' was not found.`,

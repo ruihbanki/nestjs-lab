@@ -3,7 +3,6 @@ import { FindOptionsRelations, FindOptionsSelect } from 'typeorm';
 
 import { Relations } from 'src/utils/relations.decorator';
 import { Select } from 'src/utils/select.decorator';
-
 import { ProductsService } from './products.service';
 import { Product } from './product.entity';
 import { CreateProductInput } from './create-product.input';
@@ -15,20 +14,12 @@ import { AuthPayload } from '../auth/auth-payload.decorator';
 export class ProductsResolver {
   constructor(private productsService: ProductsService) {}
 
-  @Query(() => Product)
-  async findProductById(
-    @AuthPayload('clientId') clientId: string,
-    @Args('id') id: string,
-  ) {
-    return this.productsService.findProductById(clientId, id);
-  }
-
   @Query(() => [Product])
   async findProducts(
-    @AuthPayload('clientId') clientId: string,
     @Relations() relations: FindOptionsRelations<Product>,
     @Select() select: FindOptionsSelect<Product>,
-    @Args() args?: FindProductsArgs,
+    @AuthPayload('clientId') clientId: string,
+    @Args() args: FindProductsArgs = {},
   ) {
     const { withDeleted } = args;
     return this.productsService.findProducts(clientId, {
@@ -38,36 +29,61 @@ export class ProductsResolver {
     });
   }
 
+  @Query(() => Product)
+  async findProductById(
+    @Relations() relations: FindOptionsRelations<Product>,
+    @Select() select: FindOptionsSelect<Product>,
+    @AuthPayload('clientId') clientId: string,
+    @Args('productId') productId: string,
+  ) {
+    return this.productsService.findProductById(clientId, productId, {
+      relations,
+      select,
+    });
+  }
+
   @Mutation(() => Product)
   async createProduct(
+    @Relations() relations: FindOptionsRelations<Product>,
+    @Select() select: FindOptionsSelect<Product>,
     @AuthPayload('clientId') clientId: string,
     @Args('input') input: CreateProductInput,
   ) {
-    return this.productsService.createProduct({
-      ...input,
-      client: {
-        clientId,
-      },
+    const product = await this.productsService.createProduct(clientId, input);
+    return this.productsService.findProductById(clientId, product.productId, {
+      relations,
+      select,
     });
   }
 
   @Mutation(() => Product)
   async updateProduct(
+    @Relations() relations: FindOptionsRelations<Product>,
+    @Select() select: FindOptionsSelect<Product>,
     @AuthPayload('clientId') clientId: string,
-    @Args('id') id: string,
+    @Args('productId') productId: string,
     @Args('input') input: UpdateProductInput,
   ) {
-    await this.productsService.updateProduct(id, input);
-    return this.productsService.findProductById(clientId, id);
+    await this.productsService.updateProduct(clientId, productId, input);
+    return this.productsService.findProductById(clientId, productId, {
+      relations,
+      select,
+    });
   }
 
   @Mutation(() => Boolean)
-  async deleteProduct(@Args('productId') productId: string) {
-    return this.productsService.deleteProduct(productId);
+  async deleteProduct(
+    @AuthPayload('clientId') clientId: string,
+    @Args('productId') productId: string,
+  ) {
+    return this.productsService.deleteProduct(clientId, productId);
   }
 
   @Mutation(() => Boolean)
-  async softDeleteProduct(@Args('id') id: string) {
-    return this.productsService.softDeleteProduct(id);
+  async softDeleteProduct(
+    @AuthPayload('clientId') clientId: string,
+    @Args('id') id: string,
+  ) {
+    return this.productsService.softDeleteProduct(clientId, id);
   }
 }
