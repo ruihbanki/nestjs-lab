@@ -4,8 +4,20 @@ The goal for this project is to experiment some solutions for common scenarios u
 
 # Scripts
 
+Run playground
 `npm run start:dev`
 run on http://localhost:5000/graphql
+
+Run migrations
+`npm run migration:run`
+
+Revert migrations
+`npm run migration:revert`
+
+# Migrations
+
+Create a migration file
+`npx typeorm migration:create ./src/migrations/DeleteAll`
 
 # Entities
 
