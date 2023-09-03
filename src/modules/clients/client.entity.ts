@@ -44,21 +44,6 @@ export class Client extends EntityBase {
   @JoinColumn({ name: 'country_id' })
   country: Country;
 
-  @Field(() => [User], { nullable: true })
-  @ManyToMany(() => User, (user) => user.clients, { nullable: true })
-  @JoinTable({
-    name: 'client_user',
-    joinColumn: {
-      name: 'client_id',
-      referencedColumnName: 'clientId',
-    },
-    inverseJoinColumn: {
-      name: 'user_id',
-      referencedColumnName: 'userId',
-    },
-  })
-  users?: User[];
-
   @Field(() => [ClientContact], { nullable: false })
   @OneToMany(() => ClientContact, (clientContact) => clientContact.client, {
     nullable: false,

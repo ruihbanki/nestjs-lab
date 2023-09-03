@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToMany } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Client } from 'src/modules/clients/client.entity';
 import { IsEmail, MinLength } from 'class-validator';
@@ -40,7 +46,7 @@ export class User extends EntityBase {
   @Column({ name: 'is_super', default: false })
   isSuper: boolean;
 
-  @Field(() => [Client], { nullable: true })
-  @ManyToMany(() => Client, (client) => client.users, { nullable: true })
-  clients?: Client[];
+  @ManyToOne(() => Client, { nullable: false })
+  @JoinColumn({ name: 'client_id' })
+  client: Client;
 }
