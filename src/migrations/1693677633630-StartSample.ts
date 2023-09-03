@@ -6,6 +6,14 @@ interface Country {
   iso: string;
 }
 
+interface Client {
+  client_id: string;
+  name: string;
+  domain: string;
+  website: string;
+  country_id: string;
+}
+
 export class StartSample1693677633630 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await this.insertCountries(queryRunner);
@@ -71,13 +79,16 @@ export class StartSample1693677633630 implements MigrationInterface {
   }
 
   private async insertUsers(queryRunner: QueryRunner) {
+    const clients = await this.selectAllClients(queryRunner);
+    const clientId = clients.find((row) => row.name === 'Client 1').client_id;
     await this.insertUser(
       queryRunner,
-      'user-1',
+      'user-1@mail.com',
       '1',
       'User',
       '1',
       '2000-01-01',
+      clientId,
     );
   }
 
@@ -88,12 +99,13 @@ export class StartSample1693677633630 implements MigrationInterface {
     first_name: string,
     last_name: string,
     date_of_birth: string,
+    client_id: string,
   ) {
     await queryRunner.query(
       `INSERT INTO "user" 
-        (username, password, first_name, last_name, date_of_birth, is_active, is_super)
+        (username, password, first_name, last_name, date_of_birth, is_active, is_super, client_id)
       VALUES 
-        ('${username}', '${password}', '${first_name}', '${last_name}', '${date_of_birth}', true, true)`,
+        ('${username}', '${password}', '${first_name}', '${last_name}', '${date_of_birth}', true, true, '${client_id}')`,
     );
   }
 
@@ -101,5 +113,9 @@ export class StartSample1693677633630 implements MigrationInterface {
     queryRunner: QueryRunner,
   ): Promise<Country[]> {
     return queryRunner.query(`SELECT * FROM "country"`);
+  }
+
+  private async selectAllClients(queryRunner: QueryRunner): Promise<Client[]> {
+    return queryRunner.query(`SELECT * FROM "client"`);
   }
 }
