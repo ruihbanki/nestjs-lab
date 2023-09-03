@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { ConfigService } from './modules/config/config.service';
+import { ExplainSqlLogger } from './utils/explain-sql-logger';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ConfigService } from './modules/config/config.service';
         synchronize: true,
         autoLoadEntities: true,
         logging: true,
+        logger: new ExplainSqlLogger(),
       }),
       dataSourceFactory: async (options) => {
         return await new DataSource(options).initialize();
