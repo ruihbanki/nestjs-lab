@@ -13,19 +13,16 @@ export class AuthService {
   ) {}
 
   async login(
+    clientId: string,
     username: string,
     password: string,
-    clientId?: string,
     relations?: FindOptionsRelations<LoginDTO>,
   ) {
     // get user
     const userRelations =
       typeof relations?.user === 'object' ? relations?.user : undefined;
-    const user = await this.userService.findUserByUsername(username, {
-      // relations: {
-      //   ...userRelations,
-      //   clients: !!clientId || userRelations?.clients,
-      // },
+    const user = await this.userService.findUserByUsername(clientId, username, {
+      relations: userRelations,
     });
     if (!user) {
       throw new Error('Invalid user or password');
@@ -37,15 +34,6 @@ export class AuthService {
     if (!isValidPassword) {
       throw new Error('Invalid user or password');
     }
-
-    // check if user is associated with the client
-    // const hasValidClient = !!clientId
-    //   ? user.clients?.some((c) => c.clientId === clientId)
-    //   : true;
-    // if (!hasValidClient) {
-    //   throw new Error('User is not associated with this client');
-    // }
-    const hasValidClient = true;
 
     // generate token
     const payload: AuthPayload = {

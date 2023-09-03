@@ -13,16 +13,16 @@ export class AuthResolver {
 
   @Query(() => LoginDTO)
   async login(
+    @Args('clientId') clientId: string,
     @Args('username') username: string,
     @Args('password') password: string,
-    @Args('clientId', { nullable: true }) clientId?: string,
     @Relations() relations?: FindOptionsRelations<LoginDTO>,
   ) {
     try {
       return await this.authService.login(
+        clientId,
         username,
         password,
-        clientId,
         relations,
       );
     } catch (error) {

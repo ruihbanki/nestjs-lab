@@ -44,12 +44,13 @@ export class UsersService {
   }
 
   findUserByUsername(
+    clientId: string,
     username: string,
     options: FindOptions = {},
   ): Promise<User | null> {
     const { select, relations } = options;
     return this.usersRepository.findOne({
-      where: { username },
+      where: { username, client: { clientId } },
       relations,
       select,
     });
