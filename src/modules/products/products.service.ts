@@ -13,10 +13,10 @@ import {
 
 import { Product } from './product.entity';
 import { UpdateProductInput } from './update-product.input';
-import { CreateProductDto } from './create-product.dto';
 import { FindProductsOptions } from './find-products-options.dto';
 import { FindProductOptions } from './find-product-options.dto';
 import { ProductsFilterInput, ProductsSortingInput } from './products.args';
+import { CreateProductInput } from './create-product.input';
 
 @Injectable()
 export class ProductsService {
@@ -103,15 +103,39 @@ export class ProductsService {
 
   async createProduct(
     clientId: string,
-    productDto: CreateProductDto,
+    product: CreateProductInput,
+    options: FindProductOptions = {},
   ): Promise<Product> {
-    const product = await this.ProductsRepository.save({
-      ...productDto,
+    const result = await this.ProductsRepository.save({
+      ...product,
       client: {
         clientId,
       },
     });
-    return this.findProductById(clientId, product.productId);
+    return this.findProductById(clientId, result.productId, options);
+  }
+
+  async updateProduct(
+    clientId: string,
+    productId: string,
+    input: UpdateProductInput,
+    options: FindProductOptions = {},
+  ): Promise<Product> {
+    const result = await this.ProductsRepository.update(
+      {
+        productId,
+        client: {
+          clientId,
+        },
+      },
+      input,
+    );
+    if (result.affected === 0) {
+      throw new NotFoundException(
+        `Product with the productId '${productId}' was not found.`,
+      );
+    }
+    return this.findProductById(clientId, productId, options);
   }
 
   async deleteProduct(clientId: string, productId: string): Promise<boolean> {
@@ -135,26 +159,5 @@ export class ProductsService {
       },
     });
     return result.affected > 0;
-  }
-
-  async updateProduct(
-    clientId: string,
-    productId: string,
-    input: UpdateProductInput,
-  ): Promise<void> {
-    const result = await this.ProductsRepository.update(
-      {
-        productId,
-        client: {
-          clientId,
-        },
-      },
-      input,
-    );
-    if (result.affected === 0) {
-      throw new NotFoundException(
-        `Product with the productId '${productId}' was not found.`,
-      );
-    }
   }
 }

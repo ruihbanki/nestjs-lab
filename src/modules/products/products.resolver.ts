@@ -22,9 +22,9 @@ export class ProductsResolver {
     @Select() select: FindOptionsSelect<Product>,
   ) {
     return this.productsService.findProducts(clientId, {
+      ...args,
       relations,
       select,
-      ...args,
     });
   }
 
@@ -48,8 +48,7 @@ export class ProductsResolver {
     @Relations() relations: FindOptionsRelations<Product>,
     @Select() select: FindOptionsSelect<Product>,
   ) {
-    const product = await this.productsService.createProduct(clientId, input);
-    return this.productsService.findProductById(clientId, product.productId, {
+    return this.productsService.createProduct(clientId, input, {
       relations,
       select,
     });
@@ -63,8 +62,7 @@ export class ProductsResolver {
     @Relations() relations: FindOptionsRelations<Product>,
     @Select() select: FindOptionsSelect<Product>,
   ) {
-    await this.productsService.updateProduct(clientId, productId, input);
-    return this.productsService.findProductById(clientId, productId, {
+    await this.productsService.updateProduct(clientId, productId, input, {
       relations,
       select,
     });

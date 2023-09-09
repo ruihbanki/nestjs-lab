@@ -8,9 +8,6 @@ export class CreateProductInput {
   @Field()
   price: number;
 
-  @Field()
-  available: number;
-
   @Field(() => [CategoryInput])
   categories: CategoryInput[];
 }
