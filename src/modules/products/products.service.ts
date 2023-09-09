@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import {
   Between,
   FindOptionsOrder,
+  In,
   LessThan,
-  Like,
   MoreThan,
   Raw,
   Repository,
@@ -50,12 +50,18 @@ export class ProductsService {
     } else if (filter?.priceLt !== undefined) {
       price = LessThan(filter.priceLt);
     }
+    const categories = filter.categoriesIn
+      ? {
+          productCategoryId: In(filter.categoriesIn),
+        }
+      : undefined;
 
     return this.ProductsRepository.find({
       where: {
         client: { clientId },
         name,
         price,
+        categories,
       },
       relations,
       select,

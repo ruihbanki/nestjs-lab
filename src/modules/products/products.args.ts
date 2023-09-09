@@ -13,6 +13,9 @@ export class ProductsFilterInput {
 
   @Field({ nullable: true })
   priceLt?: number;
+
+  @Field(() => [String], { nullable: true })
+  categoriesIn?: string[];
 }
 
 @InputType()
