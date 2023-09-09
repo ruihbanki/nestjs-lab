@@ -1,16 +1,19 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsRelations, FindOptionsSelect, Repository } from 'typeorm';
+import {
+  Between,
+  FindOptionsOrder,
+  LessThan,
+  Like,
+  MoreThan,
+  Raw,
+  Repository,
+} from 'typeorm';
 
 import { Product } from './product.entity';
 import { UpdateProductInput } from './update-product.input';
 import { CreateProductDto } from './create-product.dto';
-
-interface FindProductsOptions {
-  withDeleted?: boolean;
-  relations?: FindOptionsRelations<Product>;
-  select?: FindOptionsSelect<Product>;
-}
+import { FindProductsOptions } from './find-products-options.dto';
 
 @Injectable()
 export class ProductsService {
@@ -23,14 +26,43 @@ export class ProductsService {
     clientId: string,
     options: FindProductsOptions = {},
   ): Promise<Product[]> {
-    const { relations, select, withDeleted } = options;
+    const { relations, select, withDeleted, filter, sorting, paging } = options;
+
+    // sorting
+    const order = sorting?.reduce(
+      (prev, cur) => ({
+        ...prev,
+        [cur.field]: cur.direction,
+      }),
+      {},
+    ) as FindOptionsOrder<Product>;
+
+    // filter
+    const nameLikeLower = filter?.nameLike?.toLocaleLowerCase();
+    const name = nameLikeLower
+      ? Raw((alias) => `LOWER(${alias}) Like '%${nameLikeLower}%'`)
+      : undefined;
+    let price = undefined;
+    if (filter.priceGt !== undefined && filter.priceLt !== undefined) {
+      price = Between(filter.priceGt, filter.priceLt);
+    } else if (filter.priceGt !== undefined) {
+      price = MoreThan(filter.priceGt);
+    } else if (filter.priceLt !== undefined) {
+      price = LessThan(filter.priceLt);
+    }
+
     return this.ProductsRepository.find({
       where: {
         client: { clientId },
+        name,
+        price,
       },
       relations,
       select,
+      order,
       withDeleted,
+      skip: paging?.offset,
+      take: paging?.limit,
     });
   }
 

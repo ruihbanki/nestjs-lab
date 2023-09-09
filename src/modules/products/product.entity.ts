@@ -27,10 +27,6 @@ export class Product extends EntityBase {
   @Column({ type: 'decimal', precision: 10, scale: 2 })
   price: number;
 
-  @Field()
-  @Column({ type: 'int' })
-  available: number;
-
   @ManyToOne(() => Client, { nullable: false })
   @JoinColumn({ name: 'client_id' })
   client: Client;

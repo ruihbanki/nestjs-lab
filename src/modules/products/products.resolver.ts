@@ -7,7 +7,7 @@ import { ProductsService } from './products.service';
 import { Product } from './product.entity';
 import { CreateProductInput } from './create-product.input';
 import { UpdateProductInput } from './update-product.input';
-import { FindProductsArgs } from './find-products.args';
+import { ProductsArgs } from './products.args';
 import { AuthPayload } from '../auth/auth-payload.decorator';
 
 @Resolver(() => Product)
@@ -15,22 +15,21 @@ export class ProductsResolver {
   constructor(private productsService: ProductsService) {}
 
   @Query(() => [Product])
-  async findProducts(
+  async products(
     @Relations() relations: FindOptionsRelations<Product>,
     @Select() select: FindOptionsSelect<Product>,
     @AuthPayload('clientId') clientId: string,
-    @Args() args: FindProductsArgs = {},
+    @Args() args: ProductsArgs = {},
   ) {
-    const { withDeleted } = args;
     return this.productsService.findProducts(clientId, {
-      withDeleted,
       relations,
       select,
+      ...args,
     });
   }
 
   @Query(() => Product)
-  async findProductById(
+  async product(
     @Relations() relations: FindOptionsRelations<Product>,
     @Select() select: FindOptionsSelect<Product>,
     @AuthPayload('clientId') clientId: string,
