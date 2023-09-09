@@ -1,8 +1,10 @@
 import { ArgsType, Field, InputType } from '@nestjs/graphql';
-import { SortDirection } from 'src/types/service.types';
+import { ProductsSortingField } from './products-sorting-field.enum';
+import { SortDirection } from 'src/utils/sort-direction.enum';
+import { PagingInput } from 'src/utils/paging.input';
 
 @InputType()
-export class ProductsFilter {
+export class ProductsFilterInput {
   @Field({ nullable: true })
   nameLike?: string;
 
@@ -14,34 +16,25 @@ export class ProductsFilter {
 }
 
 @InputType()
-export class ProductsSorting {
-  @Field()
-  field?: 'name' | 'price' | 'createdAt';
+export class ProductsSortingInput {
+  @Field(() => ProductsSortingField)
+  field?: ProductsSortingField;
 
-  @Field()
+  @Field(() => SortDirection)
   direction?: SortDirection;
-}
-
-@InputType()
-export class ProductsPaging {
-  @Field({ nullable: true })
-  limit?: number;
-
-  @Field({ nullable: true })
-  offset?: number;
 }
 
 @ArgsType()
 export class ProductsArgs {
+  @Field(() => ProductsFilterInput, { nullable: true })
+  filter?: ProductsFilterInput;
+
+  @Field(() => [ProductsSortingInput], { nullable: true })
+  sorting?: ProductsSortingInput[];
+
+  @Field(() => PagingInput, { nullable: true })
+  paging?: PagingInput;
+
   @Field({ nullable: true })
   withDeleted?: boolean;
-
-  @Field(() => ProductsFilter, { nullable: true })
-  filter?: ProductsFilter;
-
-  @Field(() => [ProductsSorting], { nullable: true })
-  sorting?: ProductsSorting[];
-
-  @Field(() => ProductsPaging, { nullable: true })
-  paging?: ProductsPaging;
 }
