@@ -43,11 +43,11 @@ export class ProductsService {
       ? Raw((alias) => `LOWER(${alias}) Like '%${nameLikeLower}%'`)
       : undefined;
     let price = undefined;
-    if (filter.priceGt !== undefined && filter.priceLt !== undefined) {
+    if (filter?.priceGt !== undefined && filter?.priceLt !== undefined) {
       price = Between(filter.priceGt, filter.priceLt);
-    } else if (filter.priceGt !== undefined) {
-      price = MoreThan(filter.priceGt);
-    } else if (filter.priceLt !== undefined) {
+    } else if (filter?.priceGt !== undefined) {
+      price = MoreThan(filter?.priceGt);
+    } else if (filter?.priceLt !== undefined) {
       price = LessThan(filter.priceLt);
     }
 
