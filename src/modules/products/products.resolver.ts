@@ -16,10 +16,10 @@ export class ProductsResolver {
 
   @Query(() => [Product])
   async products(
-    @Relations() relations: FindOptionsRelations<Product>,
-    @Select() select: FindOptionsSelect<Product>,
     @AuthPayload('clientId') clientId: string,
     @Args() args: ProductsArgs = {},
+    @Relations() relations: FindOptionsRelations<Product>,
+    @Select() select: FindOptionsSelect<Product>,
   ) {
     return this.productsService.findProducts(clientId, {
       relations,
@@ -30,10 +30,10 @@ export class ProductsResolver {
 
   @Query(() => Product)
   async product(
-    @Relations() relations: FindOptionsRelations<Product>,
-    @Select() select: FindOptionsSelect<Product>,
     @AuthPayload('clientId') clientId: string,
     @Args('productId') productId: string,
+    @Relations() relations: FindOptionsRelations<Product>,
+    @Select() select: FindOptionsSelect<Product>,
   ) {
     return this.productsService.findProductById(clientId, productId, {
       relations,
@@ -43,10 +43,10 @@ export class ProductsResolver {
 
   @Mutation(() => Product)
   async createProduct(
-    @Relations() relations: FindOptionsRelations<Product>,
-    @Select() select: FindOptionsSelect<Product>,
     @AuthPayload('clientId') clientId: string,
     @Args('input') input: CreateProductInput,
+    @Relations() relations: FindOptionsRelations<Product>,
+    @Select() select: FindOptionsSelect<Product>,
   ) {
     const product = await this.productsService.createProduct(clientId, input);
     return this.productsService.findProductById(clientId, product.productId, {
@@ -57,11 +57,11 @@ export class ProductsResolver {
 
   @Mutation(() => Product)
   async updateProduct(
-    @Relations() relations: FindOptionsRelations<Product>,
-    @Select() select: FindOptionsSelect<Product>,
     @AuthPayload('clientId') clientId: string,
     @Args('productId') productId: string,
     @Args('input') input: UpdateProductInput,
+    @Relations() relations: FindOptionsRelations<Product>,
+    @Select() select: FindOptionsSelect<Product>,
   ) {
     await this.productsService.updateProduct(clientId, productId, input);
     return this.productsService.findProductById(clientId, productId, {

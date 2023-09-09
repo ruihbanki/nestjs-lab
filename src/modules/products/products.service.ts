@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import {
   Between,
   FindOptionsOrder,
+  FindOptionsWhere,
   In,
   LessThan,
   MoreThan,
@@ -14,6 +15,8 @@ import { Product } from './product.entity';
 import { UpdateProductInput } from './update-product.input';
 import { CreateProductDto } from './create-product.dto';
 import { FindProductsOptions } from './find-products-options.dto';
+import { FindProductOptions } from './find-product-options.dto';
+import { ProductsFilterInput, ProductsSortingInput } from './products.args';
 
 @Injectable()
 export class ProductsService {
@@ -27,17 +30,23 @@ export class ProductsService {
     options: FindProductsOptions = {},
   ): Promise<Product[]> {
     const { relations, select, withDeleted, filter, sorting, paging } = options;
+    const where = this.findProductsWhere(clientId, filter);
+    const order = this.findProductsOrder(sorting);
+    return this.ProductsRepository.find({
+      where,
+      withDeleted,
+      order,
+      relations,
+      select,
+      skip: paging?.offset,
+      take: paging?.limit,
+    });
+  }
 
-    // sorting
-    const order = sorting?.reduce(
-      (prev, cur) => ({
-        ...prev,
-        [cur.field]: cur.direction,
-      }),
-      {},
-    ) as FindOptionsOrder<Product>;
-
-    // filter
+  private findProductsWhere(
+    clientId: string,
+    filter: ProductsFilterInput,
+  ): FindOptionsWhere<Product> {
     const nameLikeLower = filter?.nameLike?.toLocaleLowerCase();
     const name = nameLikeLower
       ? Raw((alias) => `LOWER(${alias}) Like '%${nameLikeLower}%'`)
@@ -55,29 +64,33 @@ export class ProductsService {
           productCategoryId: In(filter.categoriesIn),
         }
       : undefined;
+    return {
+      client: { clientId },
+      name,
+      price,
+      categories,
+    };
+  }
 
-    return this.ProductsRepository.find({
-      where: {
-        client: { clientId },
-        name,
-        price,
-        categories,
-      },
-      relations,
-      select,
-      order,
-      withDeleted,
-      skip: paging?.offset,
-      take: paging?.limit,
-    });
+  private findProductsOrder(
+    sorting: ProductsSortingInput[],
+  ): FindOptionsOrder<Product> {
+    const initial: FindOptionsOrder<Product> = {};
+    return sorting?.reduce(
+      (prev, cur) => ({
+        ...prev,
+        [cur.field]: cur.direction,
+      }),
+      initial,
+    );
   }
 
   async findProductById(
     clientId: string,
     productId: string,
-    options: FindProductsOptions = {},
+    options: FindProductOptions = {},
   ): Promise<Product | null> {
-    const { relations, select, withDeleted } = options;
+    const { relations, select } = options;
     return this.ProductsRepository.findOne({
       where: {
         productId,
@@ -85,7 +98,6 @@ export class ProductsService {
       },
       relations,
       select,
-      withDeleted,
     });
   }
 
