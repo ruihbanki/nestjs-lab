@@ -65,9 +65,9 @@ export class ProductsService {
     } else if (filter?.priceLt !== undefined) {
       price = LessThan(filter.priceLt);
     }
-    const categories = filter.categoriesIn
+    const categories = filter?.categoriesIn
       ? {
-          productCategoryId: In(filter.categoriesIn),
+          productCategoryId: In(filter?.categoriesIn),
         }
       : undefined;
     return {

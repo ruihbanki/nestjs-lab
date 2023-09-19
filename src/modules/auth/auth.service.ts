@@ -21,9 +21,11 @@ export class AuthService {
     // get user
     const userRelations =
       typeof relations?.user === 'object' ? relations?.user : undefined;
-    const user = await this.userService.findUserByUsername(clientId, username, {
-      relations: userRelations,
-    });
+    const user = await this.userService.findUserByUsername(
+      clientId,
+      username,
+      userRelations,
+    );
     if (!user) {
       throw new Error('Invalid user or password');
     }

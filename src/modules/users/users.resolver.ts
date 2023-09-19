@@ -3,52 +3,54 @@ import { FindOptionsRelations, FindOptionsSelect } from 'typeorm';
 
 import { Relations } from 'src/utils/relations.decorator';
 import { Select } from 'src/utils/select.decorator';
-
 import { UsersService } from './users.service';
 import { User } from './user.entity';
 import { CreateUserInput } from './create-user.input';
 import { UpdateUserInput } from './update-user.input';
-import { FindUsersArgs } from './find-users.args';
+import { UsersArgs } from './users.args';
+import { AuthPayload } from '../auth/auth-payload.decorator';
 
 @Resolver(() => User)
 export class UsersResolver {
   constructor(private usersService: UsersService) {}
 
-  @Query(() => User)
-  async findUserById(@Args('id') id: string) {
-    return this.usersService.findUserById(id);
-  }
-
   @Query(() => [User])
   async users(
+    @AuthPayload('clientId') clientId: string,
+    @Args() args: UsersArgs,
     @Relations() relations: FindOptionsRelations<User>,
     @Select() select: FindOptionsSelect<User>,
-    @Args() args?: FindUsersArgs,
   ) {
-    const { withDeleted } = args;
-    return this.usersService.findUsers({ withDeleted, relations, select });
+    return this.usersService.findUsers(clientId, args, relations, select);
+  }
+
+  @Query(() => User)
+  async user(
+    @Args('userId') userId: string,
+    @Relations() relations: FindOptionsRelations<User>,
+    @Select() select: FindOptionsSelect<User>,
+  ) {
+    return this.usersService.findUserById(userId, relations, select);
   }
 
   @Mutation(() => User)
   async createUser(
-    @Args('clientId') clientId: string,
+    @AuthPayload('clientId') clientId: string,
     @Args('input') input: CreateUserInput,
+    @Relations() relations: FindOptionsRelations<User>,
+    @Select() select: FindOptionsSelect<User>,
   ) {
-    return this.usersService.createUser(clientId, input);
-  }
-
-  @Mutation(() => User)
-  async createSuperUser(@Args('input') input: CreateUserInput) {
-    return this.usersService.createSuperUser(input);
+    return this.usersService.createUser(clientId, input, relations, select);
   }
 
   @Mutation(() => User)
   async updateUser(
     @Args('id') id: string,
     @Args('input') input: UpdateUserInput,
+    @Relations() relations: FindOptionsRelations<User>,
+    @Select() select: FindOptionsSelect<User>,
   ) {
-    await this.usersService.updateUser(id, input);
-    return this.usersService.findUserById(id);
+    return this.usersService.updateUser(id, input, relations, select);
   }
 
   @Mutation(() => Boolean)
@@ -59,13 +61,5 @@ export class UsersResolver {
   @Mutation(() => Boolean)
   async softDeleteUser(@Args('id') id: string) {
     return this.usersService.softDelete(id);
-  }
-
-  @Mutation(() => Boolean)
-  async associateUser(
-    @Args('clientId') clientId: string,
-    @Args('userId') userId: string,
-  ) {
-    return this.usersService.associateUser(clientId, userId);
   }
 }
