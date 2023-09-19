@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import {
   Between,
   FindOptionsOrder,
+  FindOptionsRelations,
+  FindOptionsSelect,
   FindOptionsWhere,
   In,
   LessThan,
@@ -13,9 +15,11 @@ import {
 
 import { Product } from './product.entity';
 import { UpdateProductInput } from './update-product.input';
-import { FindProductsOptions } from './find-products-options.dto';
-import { FindProductOptions } from './find-product-options.dto';
-import { ProductsFilterInput, ProductsSortingInput } from './products.args';
+import {
+  ProductsArgs,
+  ProductsFilterInput,
+  ProductsSortingInput,
+} from './products.args';
 import { CreateProductInput } from './create-product.input';
 
 @Injectable()
@@ -27,9 +31,11 @@ export class ProductsService {
 
   async findProducts(
     clientId: string,
-    options: FindProductsOptions = {},
+    options: ProductsArgs = {},
+    relations?: FindOptionsRelations<Product>,
+    select?: FindOptionsSelect<Product>,
   ): Promise<Product[]> {
-    const { relations, select, withDeleted, filter, sorting, paging } = options;
+    const { withDeleted, filter, sorting, paging } = options;
     const where = this.findProductsWhere(clientId, filter);
     const order = this.findProductsOrder(sorting);
     return this.ProductsRepository.find({
@@ -88,9 +94,9 @@ export class ProductsService {
   async findProductById(
     clientId: string,
     productId: string,
-    options: FindProductOptions = {},
+    relations?: FindOptionsRelations<Product>,
+    select?: FindOptionsSelect<Product>,
   ): Promise<Product | null> {
-    const { relations, select } = options;
     return this.ProductsRepository.findOne({
       where: {
         productId,
@@ -104,7 +110,8 @@ export class ProductsService {
   async createProduct(
     clientId: string,
     product: CreateProductInput,
-    options: FindProductOptions = {},
+    relations?: FindOptionsRelations<Product>,
+    select?: FindOptionsSelect<Product>,
   ): Promise<Product> {
     const result = await this.ProductsRepository.save({
       ...product,
@@ -112,14 +119,15 @@ export class ProductsService {
         clientId,
       },
     });
-    return this.findProductById(clientId, result.productId, options);
+    return this.findProductById(clientId, result.productId, relations, select);
   }
 
   async updateProduct(
     clientId: string,
     productId: string,
     input: UpdateProductInput,
-    options: FindProductOptions = {},
+    relations?: FindOptionsRelations<Product>,
+    select?: FindOptionsSelect<Product>,
   ): Promise<Product> {
     const result = await this.ProductsRepository.update(
       {
@@ -135,7 +143,7 @@ export class ProductsService {
         `Product with the productId '${productId}' was not found.`,
       );
     }
-    return this.findProductById(clientId, productId, options);
+    return this.findProductById(clientId, productId, relations, select);
   }
 
   async deleteProduct(clientId: string, productId: string): Promise<boolean> {

@@ -21,11 +21,7 @@ export class ProductsResolver {
     @Relations() relations: FindOptionsRelations<Product>,
     @Select() select: FindOptionsSelect<Product>,
   ) {
-    return this.productsService.findProducts(clientId, {
-      ...args,
-      relations,
-      select,
-    });
+    return this.productsService.findProducts(clientId, args, relations, select);
   }
 
   @Query(() => Product)
@@ -35,10 +31,12 @@ export class ProductsResolver {
     @Relations() relations: FindOptionsRelations<Product>,
     @Select() select: FindOptionsSelect<Product>,
   ) {
-    return this.productsService.findProductById(clientId, productId, {
+    return this.productsService.findProductById(
+      clientId,
+      productId,
       relations,
       select,
-    });
+    );
   }
 
   @Mutation(() => Product)
@@ -48,10 +46,12 @@ export class ProductsResolver {
     @Relations() relations: FindOptionsRelations<Product>,
     @Select() select: FindOptionsSelect<Product>,
   ) {
-    return this.productsService.createProduct(clientId, input, {
+    return this.productsService.createProduct(
+      clientId,
+      input,
       relations,
       select,
-    });
+    );
   }
 
   @Mutation(() => Product)
@@ -62,10 +62,13 @@ export class ProductsResolver {
     @Relations() relations: FindOptionsRelations<Product>,
     @Select() select: FindOptionsSelect<Product>,
   ) {
-    await this.productsService.updateProduct(clientId, productId, input, {
+    await this.productsService.updateProduct(
+      clientId,
+      productId,
+      input,
       relations,
       select,
-    });
+    );
   }
 
   @Mutation(() => Boolean)

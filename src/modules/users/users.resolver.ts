@@ -20,7 +20,7 @@ export class UsersResolver {
   }
 
   @Query(() => [User])
-  async findUsers(
+  async users(
     @Relations() relations: FindOptionsRelations<User>,
     @Select() select: FindOptionsSelect<User>,
     @Args() args?: FindUsersArgs,
