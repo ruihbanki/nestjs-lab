@@ -3,7 +3,6 @@ import { FindOptionsRelations, FindOptionsSelect } from 'typeorm';
 
 import { Relations } from 'src/utils/relations.decorator';
 import { Select } from 'src/utils/select.decorator';
-
 import { ClientsService } from './clients.service';
 import { Client } from './client.entity';
 import { CreateClientInput } from './create-client.input';
@@ -15,29 +14,29 @@ export class ClientsResolver {
   constructor(private clientsService: ClientsService) {}
 
   @Query(() => Client)
-  async findClientById(
+  async client(
+    @Args('clientId') clientId: string,
     @Relations() relations: FindOptionsRelations<Client>,
     @Select() select: FindOptionsSelect<Client>,
-    @Args('clientId') clientId: string,
   ) {
-    return this.clientsService.findClientById(clientId, { relations, select });
+    return this.clientsService.findClientById(clientId, relations, select);
   }
 
   @Query(() => [Client])
-  async findClients(
+  async clients(
     @Relations() relations: FindOptionsRelations<Client>,
     @Select() select: FindOptionsSelect<Client>,
   ) {
-    return this.clientsService.findClients({ select, relations });
+    return this.clientsService.findClients(relations, select);
   }
 
   @Mutation(() => Client)
   async createClient(
+    @Args('input') input: CreateClientInput,
     @Relations() relations: FindOptionsRelations<Client>,
     @Select() select: FindOptionsSelect<Client>,
-    @Args('input') input: CreateClientInput,
   ) {
-    return this.clientsService.createClient(input, { select, relations });
+    return this.clientsService.createClient(input, relations, select);
   }
 
   @Mutation(() => Boolean)
@@ -47,19 +46,16 @@ export class ClientsResolver {
 
   @Mutation(() => Client)
   async updateClient(
-    @Relations() relations: FindOptionsRelations<Client>,
-    @Select() select: FindOptionsSelect<Client>,
     @Args('clientId') clientId: string,
     @Args('input') input: UpdateClientInput,
+    @Relations() relations: FindOptionsRelations<Client>,
+    @Select() select: FindOptionsSelect<Client>,
   ) {
-    return this.clientsService.updateClient(clientId, input, {
-      relations,
-      select,
-    });
+    return this.clientsService.updateClient(clientId, input, relations, select);
   }
 
   @Query(() => [ClientReport])
-  async viewClientsReport() {
-    return this.clientsService.viewClientReport();
+  async clientsReportView() {
+    return this.clientsService.viewClientsReport();
   }
 }

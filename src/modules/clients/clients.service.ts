@@ -13,15 +13,6 @@ import { UpdateClientInput } from './update-client.input';
 import { ClientContact } from 'src/modules/client-contacts/client-contact.entity';
 import { ClientReport } from './client-report.dto';
 
-interface FindOptions {
-  relations?: FindOptionsRelations<Client>;
-  select?: FindOptionsSelect<Client>;
-}
-
-interface FindClientsOptions extends FindOptions {
-  withDeleted?: boolean;
-}
-
 @Injectable()
 export class ClientsService {
   constructor(
@@ -32,20 +23,21 @@ export class ClientsService {
     private clientsRepository: Repository<Client>,
   ) {}
 
-  async findClients(options: FindClientsOptions = {}): Promise<Client[]> {
-    const { relations, select, withDeleted } = options;
+  async findClients(
+    relations?: FindOptionsRelations<Client>,
+    select?: FindOptionsSelect<Client>,
+  ): Promise<Client[]> {
     return this.clientsRepository.find({
       relations,
       select,
-      withDeleted,
     });
   }
 
   async findClientById(
     clientId: string,
-    options: FindOptions = {},
+    relations?: FindOptionsRelations<Client>,
+    select?: FindOptionsSelect<Client>,
   ): Promise<Client | null> {
-    const { relations, select } = options;
     return this.clientsRepository.findOne({
       where: { clientId },
       relations: relations,
@@ -55,10 +47,11 @@ export class ClientsService {
 
   async createClient(
     input: CreateClientInput,
-    options: FindOptions = {},
+    relations?: FindOptionsRelations<Client>,
+    select?: FindOptionsSelect<Client>,
   ): Promise<Client> {
     const client = await this.clientsRepository.save(input);
-    return this.findClientById(client.clientId, options);
+    return this.findClientById(client.clientId, relations, select);
   }
 
   async deleteClient(clientId: string): Promise<boolean> {
@@ -69,7 +62,8 @@ export class ClientsService {
   async updateClient(
     clientId: string,
     input: UpdateClientInput,
-    options: FindOptions = {},
+    relations?: FindOptionsRelations<Client>,
+    select?: FindOptionsSelect<Client>,
   ): Promise<Client> {
     await this.dataSource.transaction(async (transactionalEntityManager) => {
       // get repositories
@@ -98,10 +92,10 @@ export class ClientsService {
       clientContactsRepository.save(clientContacts);
     });
 
-    return this.findClientById(clientId, options);
+    return this.findClientById(clientId, relations, select);
   }
 
-  async viewClientReport(): Promise<ClientReport[]> {
+  async viewClientsReport(): Promise<ClientReport[]> {
     const rawData = await this.dataSource.query(
       `
       SELECT
