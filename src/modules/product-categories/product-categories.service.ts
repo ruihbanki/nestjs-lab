@@ -5,12 +5,7 @@ import { FindOptionsRelations, FindOptionsSelect, Repository } from 'typeorm';
 import { ProductCategory } from './product-category.entity';
 import { UpdateProductCategoryInput } from './update-product-category.input';
 import { CreateProductCategoryDto } from './create-product-category.dto';
-
-interface FindProductCategoriesOptions {
-  withDeleted?: boolean;
-  relations?: FindOptionsRelations<ProductCategory>;
-  select?: FindOptionsSelect<ProductCategory>;
-}
+import { ProductCategoriesArgs } from './product-categories.args';
 
 @Injectable()
 export class ProductCategoriesService {
@@ -21,9 +16,11 @@ export class ProductCategoriesService {
 
   async findProductCategories(
     clientId: string,
-    options: FindProductCategoriesOptions = {},
+    options: ProductCategoriesArgs,
+    relations?: FindOptionsRelations<ProductCategory>,
+    select?: FindOptionsSelect<ProductCategory>,
   ): Promise<ProductCategory[]> {
-    const { relations, select, withDeleted } = options;
+    const { withDeleted } = options;
     return this.productCategoriesRepository.find({
       where: {
         client: { clientId },
@@ -37,9 +34,9 @@ export class ProductCategoriesService {
   async findProductCategoryById(
     clientId: string,
     productCategoryId: string,
-    options: FindProductCategoriesOptions = {},
+    relations?: FindOptionsRelations<ProductCategory>,
+    select?: FindOptionsSelect<ProductCategory>,
   ): Promise<ProductCategory | null> {
-    const { relations, select, withDeleted } = options;
     return this.productCategoriesRepository.findOne({
       where: {
         productCategoryId,
@@ -47,13 +44,14 @@ export class ProductCategoriesService {
       },
       relations,
       select,
-      withDeleted,
     });
   }
 
   async createProductCategory(
     clientId: string,
     productDto: CreateProductCategoryDto,
+    relations?: FindOptionsRelations<ProductCategory>,
+    select?: FindOptionsSelect<ProductCategory>,
   ): Promise<ProductCategory> {
     const product = await this.productCategoriesRepository.save({
       ...productDto,
@@ -61,7 +59,45 @@ export class ProductCategoriesService {
         clientId,
       },
     });
-    return this.findProductCategoryById(clientId, product.productCategoryId);
+    const result = this.findProductCategoryById(
+      clientId,
+      product.productCategoryId,
+    );
+    return this.findProductCategoryById(
+      clientId,
+      (await result).productCategoryId,
+      relations,
+      select,
+    );
+  }
+
+  async updateProductCategory(
+    clientId: string,
+    productCategoryId: string,
+    input: UpdateProductCategoryInput,
+    relations?: FindOptionsRelations<ProductCategory>,
+    select?: FindOptionsSelect<ProductCategory>,
+  ): Promise<ProductCategory> {
+    const result = await this.productCategoriesRepository.update(
+      {
+        productCategoryId,
+        client: {
+          clientId,
+        },
+      },
+      input,
+    );
+    if (result.affected === 0) {
+      throw new NotFoundException(
+        `ProductCategory with the productCategoryId '${productCategoryId}' was not found.`,
+      );
+    }
+    return this.findProductCategoryById(
+      clientId,
+      productCategoryId,
+      relations,
+      select,
+    );
   }
 
   async deleteProductCategory(
@@ -88,26 +124,5 @@ export class ProductCategoriesService {
       },
     });
     return result.affected > 0;
-  }
-
-  async updateProductCategory(
-    clientId: string,
-    productCategoryId: string,
-    input: UpdateProductCategoryInput,
-  ): Promise<void> {
-    const result = await this.productCategoriesRepository.update(
-      {
-        productCategoryId,
-        client: {
-          clientId,
-        },
-      },
-      input,
-    );
-    if (result.affected === 0) {
-      throw new NotFoundException(
-        `ProductCategory with the productCategoryId '${productCategoryId}' was not found.`,
-      );
-    }
   }
 }

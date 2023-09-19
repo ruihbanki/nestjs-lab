@@ -6,7 +6,7 @@ import { Select } from 'src/utils/select.decorator';
 import { AuthPayload } from '../auth/auth-payload.decorator';
 import { ProductCategory } from './product-category.entity';
 import { ProductCategoriesService } from './product-categories.service';
-import { FindProductCategoriesArgs } from './find-product-categories.args';
+import { ProductCategoriesArgs } from './product-categories.args';
 import { CreateProductCategoryInput } from './create-product-category.input';
 import { UpdateProductCategoryInput } from './update-product-category.input';
 
@@ -15,79 +15,64 @@ export class ProductCategoriesResolver {
   constructor(private productCategoriesService: ProductCategoriesService) {}
 
   @Query(() => [ProductCategory])
-  async findProductCategories(
+  async productCategories(
+    @AuthPayload('clientId') clientId: string,
+    @Args() args: ProductCategoriesArgs = {},
     @Relations() relations: FindOptionsRelations<ProductCategory>,
     @Select() select: FindOptionsSelect<ProductCategory>,
-    @AuthPayload('clientId') clientId: string,
-    @Args() args: FindProductCategoriesArgs = {},
   ) {
-    const { withDeleted } = args;
-    return this.productCategoriesService.findProductCategories(clientId, {
-      withDeleted,
+    return this.productCategoriesService.findProductCategories(
+      clientId,
+      args,
       relations,
       select,
-    });
+    );
   }
 
   @Query(() => ProductCategory)
-  async findProductCategoryById(
-    @Relations() relations: FindOptionsRelations<ProductCategory>,
-    @Select() select: FindOptionsSelect<ProductCategory>,
+  async productCategory(
     @AuthPayload('clientId') clientId: string,
     @Args('productCategoryId') productCategoryId: string,
+    @Relations() relations: FindOptionsRelations<ProductCategory>,
+    @Select() select: FindOptionsSelect<ProductCategory>,
   ) {
     return this.productCategoriesService.findProductCategoryById(
       clientId,
       productCategoryId,
-      {
-        relations,
-        select,
-      },
+      relations,
+      select,
     );
   }
 
   @Mutation(() => ProductCategory)
   async createProductCategory(
-    @Relations() relations: FindOptionsRelations<ProductCategory>,
-    @Select() select: FindOptionsSelect<ProductCategory>,
     @AuthPayload('clientId') clientId: string,
     @Args('input') input: CreateProductCategoryInput,
+    @Relations() relations: FindOptionsRelations<ProductCategory>,
+    @Select() select: FindOptionsSelect<ProductCategory>,
   ) {
-    const productCategory =
-      await this.productCategoriesService.createProductCategory(
-        clientId,
-        input,
-      );
-    return this.productCategoriesService.findProductCategoryById(
+    return this.productCategoriesService.createProductCategory(
       clientId,
-      productCategory.productCategoryId,
-      {
-        relations,
-        select,
-      },
+      input,
+      relations,
+      select,
     );
   }
 
   @Mutation(() => ProductCategory)
   async updateProductCategory(
-    @Relations() relations: FindOptionsRelations<ProductCategory>,
-    @Select() select: FindOptionsSelect<ProductCategory>,
     @AuthPayload('clientId') clientId: string,
     @Args('productId') productId: string,
     @Args('input') input: UpdateProductCategoryInput,
+    @Relations() relations: FindOptionsRelations<ProductCategory>,
+    @Select() select: FindOptionsSelect<ProductCategory>,
   ) {
-    await this.productCategoriesService.updateProductCategory(
+    return this.productCategoriesService.updateProductCategory(
       clientId,
       productId,
       input,
-    );
-    return this.productCategoriesService.findProductCategoryById(
-      clientId,
-      productId,
-      {
-        relations,
-        select,
-      },
+      relations,
+      select,
     );
   }
 

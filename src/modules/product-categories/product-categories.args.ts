@@ -1,7 +1,7 @@
 import { ArgsType, Field } from '@nestjs/graphql';
 
 @ArgsType()
-export class FindProductCategoriesArgs {
+export class ProductCategoriesArgs {
   @Field({ nullable: true })
   withDeleted?: boolean;
 }
