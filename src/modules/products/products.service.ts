@@ -43,8 +43,8 @@ export class ProductsService {
       where,
       order,
       take: paging?.limit,
-      // relations,
-      // select,
+      relations,
+      select,
       withDeleted,
     });
     const edges = nodes.map((node) => ({
