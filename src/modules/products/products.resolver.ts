@@ -3,18 +3,19 @@ import { FindOptionsRelations, FindOptionsSelect } from 'typeorm';
 
 import { Relations } from 'src/utils/relations.decorator';
 import { Select } from 'src/utils/select.decorator';
+import { AuthPayload } from '../auth/auth-payload.decorator';
 import { ProductsService } from './products.service';
 import { Product } from './product.entity';
 import { CreateProductInput } from './create-product.input';
 import { UpdateProductInput } from './update-product.input';
 import { ProductsArgs } from './products.args';
-import { AuthPayload } from '../auth/auth-payload.decorator';
+import { ProductsConnection } from './products-connection.object';
 
 @Resolver(() => Product)
 export class ProductsResolver {
   constructor(private productsService: ProductsService) {}
 
-  @Query(() => [Product])
+  @Query(() => ProductsConnection)
   async products(
     @AuthPayload('clientId') clientId: string,
     @Args() args: ProductsArgs = {},

@@ -21,12 +21,13 @@ import {
   ProductsSortingInput,
 } from './products.args';
 import { CreateProductInput } from './create-product.input';
+import { ProductsConnection } from './products-connection.object';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectRepository(Product)
-    private ProductsRepository: Repository<Product>,
+    private productsRepository: Repository<Product>,
   ) {}
 
   async findProducts(
@@ -34,19 +35,33 @@ export class ProductsService {
     options: ProductsArgs = {},
     relations?: FindOptionsRelations<Product>,
     select?: FindOptionsSelect<Product>,
-  ): Promise<Product[]> {
+  ): Promise<ProductsConnection> {
     const { withDeleted, filter, sorting, paging } = options;
     const where = this.findProductsWhere(clientId, filter);
     const order = this.findProductsOrder(sorting);
-    return this.ProductsRepository.find({
+    const [nodes, totalCount] = await this.productsRepository.findAndCount({
       where,
-      withDeleted,
       order,
-      relations,
-      select,
-      skip: paging?.offset,
       take: paging?.limit,
+      // relations,
+      // select,
+      withDeleted,
     });
+    const edges = nodes.map((node) => ({
+      node,
+      cursor: node.productId,
+    }));
+    const pageInfo = {
+      hasNextPage: false,
+      hasPreviousPage: false,
+      startCursor: 'a',
+      endCursor: 'b',
+    };
+    return {
+      totalCount,
+      edges,
+      pageInfo,
+    };
   }
 
   private findProductsWhere(
@@ -97,7 +112,7 @@ export class ProductsService {
     relations?: FindOptionsRelations<Product>,
     select?: FindOptionsSelect<Product>,
   ): Promise<Product | null> {
-    return this.ProductsRepository.findOne({
+    return this.productsRepository.findOne({
       where: {
         productId,
         client: { clientId },
@@ -113,7 +128,7 @@ export class ProductsService {
     relations?: FindOptionsRelations<Product>,
     select?: FindOptionsSelect<Product>,
   ): Promise<Product> {
-    const result = await this.ProductsRepository.save({
+    const result = await this.productsRepository.save({
       ...product,
       client: {
         clientId,
@@ -129,7 +144,7 @@ export class ProductsService {
     relations?: FindOptionsRelations<Product>,
     select?: FindOptionsSelect<Product>,
   ): Promise<Product> {
-    const result = await this.ProductsRepository.update(
+    const result = await this.productsRepository.update(
       {
         productId,
         client: {
@@ -147,7 +162,7 @@ export class ProductsService {
   }
 
   async deleteProduct(clientId: string, productId: string): Promise<boolean> {
-    const result = await this.ProductsRepository.delete({
+    const result = await this.productsRepository.delete({
       productId,
       client: {
         clientId,
@@ -160,7 +175,7 @@ export class ProductsService {
     clientId: string,
     productId: string,
   ): Promise<boolean> {
-    const result = await this.ProductsRepository.softDelete({
+    const result = await this.productsRepository.softDelete({
       productId,
       client: {
         clientId,

@@ -6,5 +6,5 @@ export class PagingInput {
   limit?: number;
 
   @Field({ nullable: true })
-  offset?: number;
+  after?: string;
 }
