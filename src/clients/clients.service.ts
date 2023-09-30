@@ -82,62 +82,6 @@ export class ClientsService {
       const clientContactsRepository =
         transactionalEntityManager.getRepository(ClientContact);
 
-      // get the client without the contacts
-      const { contacts, ...client } = input;
-
-      if (contacts) {
-        // add client
-        const contactsWithClient = contacts.map((contact) => ({
-          ...contact,
-          client: {
-            clientId,
-          },
-        }));
-
-        // create contacts without id
-        const contactsToCreate = contactsWithClient.filter(
-          (contact) => !contact.clientContactId,
-        );
-        const created = await clientContactsRepository.save(contactsToCreate);
-
-        // update contacts with id
-        const contactsToUpdate = contacts.filter(
-          (contact) => !!contact.clientContactId,
-        );
-        clientContactsRepository.save(contactsToUpdate);
-
-        // delete all contacts the weren't created or deleted
-        const createdIds = created.map((contact) => contact.clientContactId);
-        const updatedIds = contacts
-          .filter((contact) => !!contact.clientContactId)
-          .map((contact) => contact.clientContactId);
-        const idsToNotDelete = [...createdIds, ...updatedIds];
-        clientContactsRepository.delete({
-          client: { clientId },
-          clientContactId: Not(In(idsToNotDelete)),
-        });
-      }
-
-      // update client
-      clientsRepository.update(clientId, client);
-    });
-
-    return this.findClientById(clientId, relations, select);
-  }
-
-  async updateClient(
-    clientId: string,
-    input: UpdateClientInput,
-    relations?: FindOptionsRelations<Client>,
-    select?: FindOptionsSelect<Client>,
-  ): Promise<Client> {
-    await this.dataSource.transaction(async (transactionalEntityManager) => {
-      // get repositories
-      const clientsRepository =
-        transactionalEntityManager.getRepository(Client);
-      const clientContactsRepository =
-        transactionalEntityManager.getRepository(ClientContact);
-
       // get the client without the contacts and update
       const { contacts, ...client } = input;
       clientsRepository.update(clientId, client);
