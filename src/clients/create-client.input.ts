@@ -16,12 +16,12 @@ export class CreateClientInput {
   @Field()
   country: CountryInput;
 
-  @Field(() => [ClientContactInput])
-  contacts: ClientContactInput[];
+  @Field(() => [CreateClientContactInput])
+  contacts: CreateClientContactInput[];
 }
 
 @InputType()
-export class ClientContactInput {
+export class CreateClientContactInput {
   @Field()
   @MinLength(3)
   firstName: string;

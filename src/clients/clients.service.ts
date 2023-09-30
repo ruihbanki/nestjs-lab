@@ -4,6 +4,8 @@ import {
   DataSource,
   FindOptionsRelations,
   FindOptionsSelect,
+  In,
+  Not,
   Repository,
 } from 'typeorm';
 
@@ -80,24 +82,47 @@ export class ClientsService {
       const clientContactsRepository =
         transactionalEntityManager.getRepository(ClientContact);
 
-      // delete client contacts
-      clientContactsRepository.delete({ client: { clientId } });
+      // get the client without the contacts
+      const { contacts, ...client } = input;
 
-      // update client without passing the contacts
-      const inputWithoutContacts = {
-        ...input,
-        contacts: undefined,
-      };
-      clientsRepository.update(clientId, inputWithoutContacts);
+      // insert contacts without id
+      if (contacts) {
+        const contactsToInsert = contacts
+          .filter((contact) => !contact.clientContactId)
+          .map((contact) => ({
+            ...contact,
+            client: {
+              clientId,
+            },
+          }));
+        const created = await clientContactsRepository.save(contactsToInsert);
 
-      // insert new contacts
-      const clientContacts = input.contacts.map((c) => ({
-        ...c,
-        client: {
-          clientId,
-        },
-      }));
-      clientContactsRepository.save(clientContacts);
+        // update contacts with id
+        const contactsToUpdate = contacts
+          .filter((contact) => !!contact.clientContactId)
+          .map((contact) => ({
+            ...contact,
+            client: {
+              clientId,
+            },
+          }));
+        clientContactsRepository.save(contactsToUpdate);
+
+        //
+        const createdIds = created.map((contact) => contact.clientContactId);
+        const updatedIds = contacts
+          .filter((contact) => !!contact.clientContactId)
+          .map((contact) => contact.clientContactId);
+        const idsToNotDelete = [...createdIds, ...updatedIds];
+        console.log({ idsToNotDelete });
+        clientContactsRepository.delete({
+          client: { clientId },
+          clientContactId: Not(In(idsToNotDelete)),
+        });
+      }
+
+      // update client
+      clientsRepository.update(clientId, client);
     });
 
     return this.findClientById(clientId, relations, select);

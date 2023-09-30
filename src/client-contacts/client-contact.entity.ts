@@ -12,6 +12,7 @@ import { Client } from 'src/clients/client.entity';
 @Entity()
 @ObjectType()
 export class ClientContact {
+  @Field()
   @PrimaryGeneratedColumn('uuid', { name: 'client_contact_id' })
   clientContactId: string;
 
