@@ -40,18 +40,20 @@ export class ProductsService {
     const { withDeleted, filter, sorting, paging } = options;
     const where = this.findProductsWhere(clientId, filter);
     const order = this.findProductsOrder(sorting);
-    const [nodes, totalCount] = await this.productsRepository.findAndCount({
-      where,
-      order,
-      take: paging?.limit,
-      skip: paging?.offset,
-      relations,
-      select,
-      withDeleted,
-    });
+    const [nodesPlusOne, totalCount] =
+      await this.productsRepository.findAndCount({
+        where,
+        order,
+        take: paging?.limit + 1,
+        skip: paging?.offset,
+        relations,
+        select,
+        withDeleted,
+      });
+    const nodes = nodesPlusOne.slice(0, paging?.limit);
     const pageInfo: OffsetPageInfo = {
-      hasNextPage: false,
-      hasPreviousPage: false,
+      hasPreviousPage: paging?.offset > 0,
+      hasNextPage: nodesPlusOne.length > nodes.length,
     };
     return {
       totalCount,
