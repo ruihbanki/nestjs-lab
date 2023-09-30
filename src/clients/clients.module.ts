@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Client } from './client.entity';
 import { ClientsResolver } from './clients.resolver';
 import { ClientsService } from './clients.service';
-import { ClientContact } from 'src/modules/client-contacts/client-contact.entity';
+import { ClientContact } from 'src/client-contacts/client-contact.entity';
 
 @Module({
   imports: [

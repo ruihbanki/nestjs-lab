@@ -1,4 +1,4 @@
-import { UsersService } from 'src/modules/users/users.service';
+import { UsersService } from 'src/users/users.service';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthPayload } from './auth.types';

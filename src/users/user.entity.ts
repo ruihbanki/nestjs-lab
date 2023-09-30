@@ -6,7 +6,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
-import { Client } from 'src/modules/clients/client.entity';
+import { Client } from 'src/clients/client.entity';
 import { IsEmail, MinLength } from 'class-validator';
 import { EntityBase } from 'src/utils/entity-base';
 

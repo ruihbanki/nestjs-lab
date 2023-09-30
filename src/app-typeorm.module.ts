@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { ConfigService } from './modules/config/config.service';
+import { ConfigService } from './config/config.service';
 import { ExplainSqlLogger } from './utils/explain-sql-logger';
 
 @Module({
