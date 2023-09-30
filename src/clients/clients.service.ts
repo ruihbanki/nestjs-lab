@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import {
   DataSource,
@@ -54,9 +54,17 @@ export class ClientsService {
     return this.findClientById(client.clientId, relations, select);
   }
 
-  async deleteClient(clientId: string): Promise<boolean> {
-    const result = await this.clientsRepository.delete(clientId);
-    return result.affected > 0;
+  async deleteClient(
+    clientId: string,
+    relations?: FindOptionsRelations<Client>,
+    select?: FindOptionsSelect<Client>,
+  ): Promise<Client> {
+    const client = await this.findClientById(clientId, relations, select);
+    if (!client) {
+      throw new NotFoundException('Client not found');
+    }
+    await this.clientsRepository.softDelete(clientId);
+    return client;
   }
 
   async updateClient(

@@ -13,6 +13,14 @@ import { ClientReport } from './client-report.dto';
 export class ClientsResolver {
   constructor(private clientsService: ClientsService) {}
 
+  @Query(() => [Client])
+  async clients(
+    @Relations() relations: FindOptionsRelations<Client>,
+    @Select() select: FindOptionsSelect<Client>,
+  ) {
+    return this.clientsService.findClients(relations, select);
+  }
+
   @Query(() => Client)
   async client(
     @Args('clientId') clientId: string,
@@ -20,14 +28,6 @@ export class ClientsResolver {
     @Select() select: FindOptionsSelect<Client>,
   ) {
     return this.clientsService.findClientById(clientId, relations, select);
-  }
-
-  @Query(() => [Client])
-  async clients(
-    @Relations() relations: FindOptionsRelations<Client>,
-    @Select() select: FindOptionsSelect<Client>,
-  ) {
-    return this.clientsService.findClients(relations, select);
   }
 
   @Mutation(() => Client)
@@ -39,9 +39,13 @@ export class ClientsResolver {
     return this.clientsService.createClient(input, relations, select);
   }
 
-  @Mutation(() => Boolean)
-  async deleteClient(@Args('clientId') clientId: string) {
-    return this.clientsService.deleteClient(clientId);
+  @Mutation(() => Client)
+  async deleteClient(
+    @Args('clientId') clientId: string,
+    @Relations() relations: FindOptionsRelations<Client>,
+    @Select() select: FindOptionsSelect<Client>,
+  ) {
+    return this.clientsService.deleteClient(clientId, relations, select);
   }
 
   @Mutation(() => Client)
