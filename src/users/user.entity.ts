@@ -9,6 +9,7 @@ import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Client } from 'src/clients/client.entity';
 import { IsEmail, MinLength } from 'class-validator';
 import { EntityBase } from 'src/utils/entity-base';
+import { UserType } from './user-type.enum';
 
 @Entity()
 @ObjectType()
@@ -42,9 +43,9 @@ export class User extends EntityBase {
   @Column({ name: 'is_active', default: true })
   isActive: boolean;
 
-  @Field()
-  @Column({ name: 'is_super', default: false })
-  isSuper: boolean;
+  @Field(() => UserType)
+  @Column({ name: 'user_type' })
+  userType: UserType;
 
   @ManyToOne(() => Client, { nullable: false })
   @JoinColumn({ name: 'client_id' })

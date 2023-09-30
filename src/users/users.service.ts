@@ -30,16 +30,21 @@ export class UsersService {
     });
   }
 
-  findUserById(
+  async findUserById(
+    clientId: string,
     userId: string,
     relations?: FindOptionsRelations<User>,
     select?: FindOptionsSelect<User>,
-  ): Promise<User | null> {
-    return this.usersRepository.findOne({
-      where: { userId },
+  ): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      where: { userId, client: { clientId } },
       relations,
       select,
     });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 
   findUserByUsername(
@@ -63,38 +68,36 @@ export class UsersService {
   ): Promise<User> {
     const user = {
       ...input,
-      clients: [
-        {
-          clientId,
-        },
-      ],
+      client: {
+        clientId,
+      },
     };
     const result = await this.usersRepository.save(user);
-    return this.findUserById(result.userId, relations, select);
+    return this.findUserById(clientId, result.userId, relations, select);
   }
 
   async updateUser(
+    clientId: string,
     userId: string,
     input: UpdateUserInput,
     relations?: FindOptionsRelations<User>,
     select?: FindOptionsSelect<User>,
   ): Promise<User> {
-    const result = await this.usersRepository.update(userId, input);
-    if (result.affected === 0) {
-      throw new NotFoundException(
-        `User with the id '${userId}' was not found.`,
-      );
-    }
-    return this.findUserById(userId, relations, select);
+    await this.usersRepository.update(
+      {
+        userId,
+        client: {
+          clientId,
+        },
+      },
+      input,
+    );
+    return this.findUserById(clientId, userId, relations, select);
   }
 
-  async softDelete(id: string): Promise<boolean> {
-    const result = await this.usersRepository.softDelete(id);
-    return result.affected > 0;
-  }
-
-  async deleteUser(id: string): Promise<boolean> {
-    const result = await this.usersRepository.delete(id);
-    return result.affected > 0;
+  async deleteUser(clientId: string, userId: string): Promise<User> {
+    const user = await this.findUserById(clientId, userId);
+    await this.usersRepository.softDelete(userId);
+    return user;
   }
 }

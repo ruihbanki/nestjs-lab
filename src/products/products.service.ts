@@ -145,25 +145,6 @@ export class ProductsService {
     return this.findProductById(clientId, result.productId, relations, select);
   }
 
-  async updateProduct(
-    clientId: string,
-    productId: string,
-    input: UpdateProductInput,
-    relations?: FindOptionsRelations<Product>,
-    select?: FindOptionsSelect<Product>,
-  ): Promise<Product> {
-    await this.productsRepository.update(
-      {
-        productId,
-        client: {
-          clientId,
-        },
-      },
-      input,
-    );
-    return await this.findProductById(clientId, productId, relations, select);
-  }
-
   async deleteProduct(
     clientId: string,
     productId: string,
@@ -186,5 +167,24 @@ export class ProductsService {
       },
     });
     return product;
+  }
+
+  async updateProduct(
+    clientId: string,
+    productId: string,
+    input: UpdateProductInput,
+    relations?: FindOptionsRelations<Product>,
+    select?: FindOptionsSelect<Product>,
+  ): Promise<Product> {
+    await this.productsRepository.update(
+      {
+        productId,
+        client: {
+          clientId,
+        },
+      },
+      input,
+    );
+    return await this.findProductById(clientId, productId, relations, select);
   }
 }

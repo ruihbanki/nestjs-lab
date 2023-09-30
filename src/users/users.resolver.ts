@@ -26,11 +26,12 @@ export class UsersResolver {
 
   @Query(() => User)
   async user(
+    @AuthPayload('clientId') clientId: string,
     @Args('userId') userId: string,
     @Relations() relations: FindOptionsRelations<User>,
     @Select() select: FindOptionsSelect<User>,
   ) {
-    return this.usersService.findUserById(userId, relations, select);
+    return this.usersService.findUserById(clientId, userId, relations, select);
   }
 
   @Mutation(() => User)
@@ -43,23 +44,22 @@ export class UsersResolver {
     return this.usersService.createUser(clientId, input, relations, select);
   }
 
+  @Mutation(() => Boolean)
+  async deleteUser(
+    @AuthPayload('clientId') clientId: string,
+    @Args('userId') userId: string,
+  ) {
+    return this.usersService.deleteUser(clientId, userId);
+  }
+
   @Mutation(() => User)
   async updateUser(
+    @AuthPayload('clientId') clientId: string,
     @Args('id') id: string,
     @Args('input') input: UpdateUserInput,
     @Relations() relations: FindOptionsRelations<User>,
     @Select() select: FindOptionsSelect<User>,
   ) {
-    return this.usersService.updateUser(id, input, relations, select);
-  }
-
-  @Mutation(() => Boolean)
-  async deleteUser(@Args('id') id: string) {
-    return this.usersService.deleteUser(id);
-  }
-
-  @Mutation(() => Boolean)
-  async softDeleteUser(@Args('id') id: string) {
-    return this.usersService.softDelete(id);
+    return this.usersService.updateUser(clientId, id, input, relations, select);
   }
 }
