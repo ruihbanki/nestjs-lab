@@ -4,6 +4,7 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Client } from 'src/clients/client.entity';
@@ -13,6 +14,7 @@ import { UserType } from './user-type.enum';
 
 @Entity()
 @ObjectType()
+@Index('IDX_username', ['client.clientId', 'username'], { unique: true })
 export class User extends EntityBase {
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid', { name: 'user_id' })
@@ -20,7 +22,7 @@ export class User extends EntityBase {
 
   @Field()
   @IsEmail()
-  @Column({ unique: true })
+  @Column()
   username: string;
 
   @Column()
