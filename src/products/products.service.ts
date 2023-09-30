@@ -113,8 +113,8 @@ export class ProductsService {
     productId: string,
     relations?: FindOptionsRelations<Product>,
     select?: FindOptionsSelect<Product>,
-  ): Promise<Product | null> {
-    return this.productsRepository.findOne({
+  ): Promise<Product> {
+    const result = await this.productsRepository.findOne({
       where: {
         productId,
         client: { clientId },
@@ -122,6 +122,10 @@ export class ProductsService {
       relations,
       select,
     });
+    if (!result) {
+      throw new NotFoundException('Product not found');
+    }
+    return result;
   }
 
   async createProduct(
@@ -146,7 +150,7 @@ export class ProductsService {
     relations?: FindOptionsRelations<Product>,
     select?: FindOptionsSelect<Product>,
   ): Promise<Product> {
-    const result = await this.productsRepository.update(
+    await this.productsRepository.update(
       {
         productId,
         client: {
@@ -155,34 +159,30 @@ export class ProductsService {
       },
       input,
     );
-    if (result.affected === 0) {
-      throw new NotFoundException(
-        `Product with the productId '${productId}' was not found.`,
-      );
-    }
-    return this.findProductById(clientId, productId, relations, select);
+    return await this.findProductById(clientId, productId, relations, select);
   }
 
-  async deleteProduct(clientId: string, productId: string): Promise<boolean> {
-    const result = await this.productsRepository.delete({
-      productId,
-      client: {
-        clientId,
-      },
-    });
-    return result.affected > 0;
-  }
-
-  async softDeleteProduct(
+  async deleteProduct(
     clientId: string,
     productId: string,
-  ): Promise<boolean> {
-    const result = await this.productsRepository.softDelete({
+    relations?: FindOptionsRelations<Product>,
+    select?: FindOptionsSelect<Product>,
+  ): Promise<Product> {
+    const product = await this.findProductById(
+      clientId,
+      productId,
+      relations,
+      select,
+    );
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+    await this.productsRepository.softDelete({
       productId,
       client: {
         clientId,
       },
     });
-    return result.affected > 0;
+    return product;
   }
 }

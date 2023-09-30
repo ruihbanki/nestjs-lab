@@ -68,7 +68,7 @@ export class ProductsResolver {
     @Relations() relations: FindOptionsRelations<Product>,
     @Select() select: FindOptionsSelect<Product>,
   ) {
-    await this.productsService.updateProduct(
+    return this.productsService.updateProduct(
       clientId,
       productId,
       input,
@@ -77,19 +77,18 @@ export class ProductsResolver {
     );
   }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Product)
   async deleteProduct(
     @AuthPayload('clientId') clientId: string,
     @Args('productId') productId: string,
+    @Relations() relations: FindOptionsRelations<Product>,
+    @Select() select: FindOptionsSelect<Product>,
   ) {
-    return this.productsService.deleteProduct(clientId, productId);
-  }
-
-  @Mutation(() => Boolean)
-  async softDeleteProduct(
-    @AuthPayload('clientId') clientId: string,
-    @Args('id') id: string,
-  ) {
-    return this.productsService.softDeleteProduct(clientId, id);
+    return this.productsService.deleteProduct(
+      clientId,
+      productId,
+      relations,
+      select,
+    );
   }
 }
