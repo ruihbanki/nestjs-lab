@@ -1,7 +1,7 @@
 import { ArgsType, Field, InputType } from '@nestjs/graphql';
 import { ProductsSortingField } from './products-sorting-field.enum';
 import { SortDirection } from 'src/utils/sort-direction.enum';
-import { PagingInput } from 'src/utils/paging.input';
+import { OffsetPagingInput } from 'src/utils/offset-paging.input';
 
 @InputType()
 export class ProductsFilterInput {
@@ -35,8 +35,8 @@ export class ProductsArgs {
   @Field(() => [ProductsSortingInput], { nullable: true })
   sorting?: ProductsSortingInput[];
 
-  @Field(() => PagingInput, { nullable: true })
-  paging?: PagingInput;
+  @Field(() => OffsetPagingInput, { nullable: true })
+  paging?: OffsetPagingInput;
 
   @Field({ nullable: true })
   withDeleted?: boolean;

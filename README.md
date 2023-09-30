@@ -290,7 +290,15 @@ export class Client extends EntityBase {
 
 ### Offset pagination
 
+- easy to implement
+- can go to a specific page
+- has issues when adding or removing rows
+
 ### Cursor pagination
+
+- the most recommended way
+- cursor is a base 64 key with all sorted keys and always needs to include the id
+- requires a column with sequential numbers
 
 ## Sort
 

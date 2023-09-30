@@ -3,8 +3,6 @@ import { FindOptionsRelations, FindOptionsSelect } from 'typeorm';
 
 import { Relations } from 'src/utils/relations.decorator';
 import { Select } from 'src/utils/select.decorator';
-import { ConnectionSelect } from 'src/utils/connection-select.decorator';
-import { ConnectionRelations } from 'src/utils/connection-relations.decorator';
 import { AuthPayload } from '../auth/auth-payload.decorator';
 import { ProductsService } from './products.service';
 import { Product } from './product.entity';
@@ -21,10 +19,15 @@ export class ProductsResolver {
   async products(
     @AuthPayload('clientId') clientId: string,
     @Args() args: ProductsArgs = {},
-    @ConnectionRelations() relations: FindOptionsRelations<Product>,
-    @ConnectionSelect() select: FindOptionsSelect<Product>,
+    @Relations() relations: FindOptionsRelations<ProductsConnection>,
+    @Select() select: FindOptionsSelect<ProductsConnection>,
   ) {
-    return this.productsService.findProducts(clientId, args, relations, select);
+    return this.productsService.findProducts(
+      clientId,
+      args,
+      typeof relations.nodes === 'object' ? relations.nodes : undefined,
+      typeof select.nodes === 'object' ? select.nodes : undefined,
+    );
   }
 
   @Query(() => Product)

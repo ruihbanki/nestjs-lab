@@ -22,6 +22,7 @@ import {
 } from './products.args';
 import { CreateProductInput } from './create-product.input';
 import { ProductsConnection } from './products-connection.object';
+import { OffsetPageInfo } from 'src/utils/offset-page-info.object';
 
 @Injectable()
 export class ProductsService {
@@ -43,23 +44,18 @@ export class ProductsService {
       where,
       order,
       take: paging?.limit,
+      skip: paging?.offset,
       relations,
       select,
       withDeleted,
     });
-    const edges = nodes.map((node) => ({
-      node,
-      cursor: node.productId,
-    }));
-    const pageInfo = {
+    const pageInfo: OffsetPageInfo = {
       hasNextPage: false,
       hasPreviousPage: false,
-      startCursor: 'a',
-      endCursor: 'b',
     };
     return {
       totalCount,
-      edges,
+      nodes,
       pageInfo,
     };
   }
@@ -68,10 +64,13 @@ export class ProductsService {
     clientId: string,
     filter: ProductsFilterInput,
   ): FindOptionsWhere<Product> {
+    // name
     const nameLikeLower = filter?.nameLike?.toLocaleLowerCase();
     const name = nameLikeLower
       ? Raw((alias) => `LOWER(${alias}) Like '%${nameLikeLower}%'`)
       : undefined;
+
+    // price
     let price = undefined;
     if (filter?.priceGt !== undefined && filter?.priceLt !== undefined) {
       price = Between(filter.priceGt, filter.priceLt);
@@ -80,11 +79,14 @@ export class ProductsService {
     } else if (filter?.priceLt !== undefined) {
       price = LessThan(filter.priceLt);
     }
+
+    //categories
     const categories = filter?.categoriesIn
       ? {
           productCategoryId: In(filter?.categoriesIn),
         }
       : undefined;
+
     return {
       client: { clientId },
       name,

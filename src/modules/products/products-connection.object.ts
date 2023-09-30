@@ -1,24 +1,15 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Product } from './product.entity';
-import { PageInfo } from 'src/utils/page-info.object';
-
-@ObjectType()
-export class ProductEdge {
-  @Field(() => Product)
-  node: Product;
-
-  @Field()
-  cursor: string;
-}
+import { OffsetPageInfo } from 'src/utils/offset-page-info.object';
 
 @ObjectType()
 export class ProductsConnection {
   @Field()
   totalCount: number;
 
-  @Field(() => [ProductEdge])
-  edges: ProductEdge[];
+  @Field(() => [Product])
+  nodes: Product[];
 
-  @Field(() => PageInfo)
-  pageInfo: PageInfo;
+  @Field(() => OffsetPageInfo)
+  pageInfo: OffsetPageInfo;
 }

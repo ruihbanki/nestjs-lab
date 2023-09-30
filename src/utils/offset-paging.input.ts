@@ -1,10 +1,10 @@
 import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
-export class PagingInput {
+export class OffsetPagingInput {
   @Field({ nullable: true })
   limit?: number;
 
   @Field({ nullable: true })
-  after?: string;
+  offset?: number;
 }
