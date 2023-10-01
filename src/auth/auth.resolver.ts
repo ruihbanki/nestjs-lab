@@ -5,7 +5,7 @@ import { AuthService } from './auth.service';
 import { Relations } from 'src/utils/relations.decorator';
 import { LoginDTO } from './login-result.dto';
 import { UnauthorizedException } from '@nestjs/common';
-import { ClientTokenDTO } from './client-token.dto copy';
+import { ClientTokenDTO } from './client-token.dto';
 
 @Resolver()
 export class AuthResolver {

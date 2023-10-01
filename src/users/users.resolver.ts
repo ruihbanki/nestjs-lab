@@ -3,12 +3,13 @@ import { FindOptionsRelations, FindOptionsSelect } from 'typeorm';
 
 import { Relations } from 'src/utils/relations.decorator';
 import { Select } from 'src/utils/select.decorator';
+import { AuthClient } from 'src/auth/auth-client.decorator';
+import { AuthClientDTO } from 'src/auth/auth-client.dto';
 import { UsersService } from './users.service';
 import { User } from './user.entity';
 import { CreateUserInput } from './create-user.input';
 import { UpdateUserInput } from './update-user.input';
 import { UsersArgs } from './users.args';
-import { AuthPayload } from '../auth/auth-payload.decorator';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -16,7 +17,7 @@ export class UsersResolver {
 
   @Query(() => [User])
   async users(
-    @AuthPayload('clientId') clientId: string,
+    @AuthClient() { clientId }: AuthClientDTO,
     @Args() args: UsersArgs,
     @Relations() relations: FindOptionsRelations<User>,
     @Select() select: FindOptionsSelect<User>,
@@ -26,7 +27,7 @@ export class UsersResolver {
 
   @Query(() => User)
   async user(
-    @AuthPayload('clientId') clientId: string,
+    @AuthClient() { clientId }: AuthClientDTO,
     @Args('userId') userId: string,
     @Relations() relations: FindOptionsRelations<User>,
     @Select() select: FindOptionsSelect<User>,
@@ -36,7 +37,7 @@ export class UsersResolver {
 
   @Mutation(() => User)
   async createUser(
-    @AuthPayload('clientId') clientId: string,
+    @AuthClient() { clientId }: AuthClientDTO,
     @Args('input') input: CreateUserInput,
     @Relations() relations: FindOptionsRelations<User>,
     @Select() select: FindOptionsSelect<User>,
@@ -46,7 +47,7 @@ export class UsersResolver {
 
   @Mutation(() => Boolean)
   async deleteUser(
-    @AuthPayload('clientId') clientId: string,
+    @AuthClient() { clientId }: AuthClientDTO,
     @Args('userId') userId: string,
   ) {
     return this.usersService.deleteUser(clientId, userId);
@@ -54,7 +55,7 @@ export class UsersResolver {
 
   @Mutation(() => User)
   async updateUser(
-    @AuthPayload('clientId') clientId: string,
+    @AuthClient() { clientId }: AuthClientDTO,
     @Args('id') id: string,
     @Args('input') input: UpdateUserInput,
     @Relations() relations: FindOptionsRelations<User>,

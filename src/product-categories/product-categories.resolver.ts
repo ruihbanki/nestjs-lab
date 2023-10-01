@@ -3,12 +3,13 @@ import { FindOptionsRelations, FindOptionsSelect } from 'typeorm';
 
 import { Relations } from 'src/utils/relations.decorator';
 import { Select } from 'src/utils/select.decorator';
-import { AuthPayload } from '../auth/auth-payload.decorator';
 import { ProductCategory } from './product-category.entity';
 import { ProductCategoriesService } from './product-categories.service';
 import { ProductCategoriesArgs } from './product-categories.args';
 import { CreateProductCategoryInput } from './create-product-category.input';
 import { UpdateProductCategoryInput } from './update-product-category.input';
+import { AuthClient } from 'src/auth/auth-client.decorator';
+import { AuthClientDTO } from 'src/auth/auth-client.dto';
 
 @Resolver(() => ProductCategory)
 export class ProductCategoriesResolver {
@@ -16,7 +17,7 @@ export class ProductCategoriesResolver {
 
   @Query(() => [ProductCategory])
   async productCategories(
-    @AuthPayload('clientId') clientId: string,
+    @AuthClient() { clientId }: AuthClientDTO,
     @Args() args: ProductCategoriesArgs = {},
     @Relations() relations: FindOptionsRelations<ProductCategory>,
     @Select() select: FindOptionsSelect<ProductCategory>,
@@ -31,7 +32,7 @@ export class ProductCategoriesResolver {
 
   @Query(() => ProductCategory)
   async productCategory(
-    @AuthPayload('clientId') clientId: string,
+    @AuthClient() { clientId }: AuthClientDTO,
     @Args('productCategoryId') productCategoryId: string,
     @Relations() relations: FindOptionsRelations<ProductCategory>,
     @Select() select: FindOptionsSelect<ProductCategory>,
@@ -46,7 +47,7 @@ export class ProductCategoriesResolver {
 
   @Mutation(() => ProductCategory)
   async createProductCategory(
-    @AuthPayload('clientId') clientId: string,
+    @AuthClient() { clientId }: AuthClientDTO,
     @Args('input') input: CreateProductCategoryInput,
     @Relations() relations: FindOptionsRelations<ProductCategory>,
     @Select() select: FindOptionsSelect<ProductCategory>,
@@ -61,7 +62,7 @@ export class ProductCategoriesResolver {
 
   @Mutation(() => ProductCategory)
   async updateProductCategory(
-    @AuthPayload('clientId') clientId: string,
+    @AuthClient() { clientId }: AuthClientDTO,
     @Args('productId') productId: string,
     @Args('input') input: UpdateProductCategoryInput,
     @Relations() relations: FindOptionsRelations<ProductCategory>,
@@ -78,7 +79,7 @@ export class ProductCategoriesResolver {
 
   @Mutation(() => Boolean)
   async deleteProductCategory(
-    @AuthPayload('clientId') clientId: string,
+    @AuthClient() { clientId }: AuthClientDTO,
     @Args('productId') productId: string,
   ) {
     return this.productCategoriesService.deleteProductCategory(
@@ -89,7 +90,7 @@ export class ProductCategoriesResolver {
 
   @Mutation(() => Boolean)
   async softDeleteProductCategory(
-    @AuthPayload('clientId') clientId: string,
+    @AuthClient() { clientId }: AuthClientDTO,
     @Args('id') id: string,
   ) {
     return this.productCategoriesService.softDeleteProductCategory(

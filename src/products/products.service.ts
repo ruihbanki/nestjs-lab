@@ -21,7 +21,7 @@ import {
   ProductsSortingInput,
 } from './products.args';
 import { CreateProductInput } from './create-product.input';
-import { ProductsConnection } from './products-connection.object';
+import { ProductsConnection } from './products-connection.dto';
 import { OffsetPageInfo } from 'src/utils/offset-page-info.object';
 
 @Injectable()

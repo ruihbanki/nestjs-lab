@@ -3,13 +3,14 @@ import { FindOptionsRelations, FindOptionsSelect } from 'typeorm';
 
 import { Relations } from 'src/utils/relations.decorator';
 import { Select } from 'src/utils/select.decorator';
-import { AuthPayload } from '../auth/auth-payload.decorator';
+import { AuthClientDTO } from 'src/auth/auth-client.dto';
+import { AuthClient } from 'src/auth/auth-client.decorator';
 import { ProductsService } from './products.service';
 import { Product } from './product.entity';
 import { CreateProductInput } from './create-product.input';
 import { UpdateProductInput } from './update-product.input';
 import { ProductsArgs } from './products.args';
-import { ProductsConnection } from './products-connection.object';
+import { ProductsConnection } from './products-connection.dto';
 
 @Resolver(() => Product)
 export class ProductsResolver {
@@ -17,7 +18,7 @@ export class ProductsResolver {
 
   @Query(() => ProductsConnection)
   async products(
-    @AuthPayload('clientId') clientId: string,
+    @AuthClient() { clientId }: AuthClientDTO,
     @Args() args: ProductsArgs = {},
     @Relations() relations: FindOptionsRelations<ProductsConnection>,
     @Select() select: FindOptionsSelect<ProductsConnection>,
@@ -32,7 +33,7 @@ export class ProductsResolver {
 
   @Query(() => Product)
   async product(
-    @AuthPayload('clientId') clientId: string,
+    @AuthClient() { clientId }: AuthClientDTO,
     @Args('productId') productId: string,
     @Relations() relations: FindOptionsRelations<Product>,
     @Select() select: FindOptionsSelect<Product>,
@@ -47,7 +48,7 @@ export class ProductsResolver {
 
   @Mutation(() => Product)
   async createProduct(
-    @AuthPayload('clientId') clientId: string,
+    @AuthClient() { clientId }: AuthClientDTO,
     @Args('input') input: CreateProductInput,
     @Relations() relations: FindOptionsRelations<Product>,
     @Select() select: FindOptionsSelect<Product>,
@@ -62,7 +63,7 @@ export class ProductsResolver {
 
   @Mutation(() => Product)
   async updateProduct(
-    @AuthPayload('clientId') clientId: string,
+    @AuthClient() { clientId }: AuthClientDTO,
     @Args('productId') productId: string,
     @Args('input') input: UpdateProductInput,
     @Relations() relations: FindOptionsRelations<Product>,
@@ -79,7 +80,7 @@ export class ProductsResolver {
 
   @Mutation(() => Product)
   async deleteProduct(
-    @AuthPayload('clientId') clientId: string,
+    @AuthClient() { clientId }: AuthClientDTO,
     @Args('productId') productId: string,
     @Relations() relations: FindOptionsRelations<Product>,
     @Select() select: FindOptionsSelect<Product>,

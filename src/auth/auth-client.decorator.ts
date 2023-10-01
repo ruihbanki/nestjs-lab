@@ -3,18 +3,18 @@ import {
   ExecutionContext,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AuthPayloadKey } from './auth.types';
 import { GqlExecutionContext } from '@nestjs/graphql';
+import { AuthClientDTO } from './auth-client.dto';
 
-export const AuthPayload = createParamDecorator(
-  (key: AuthPayloadKey, context: ExecutionContext) => {
+export const AuthClient = createParamDecorator(
+  (_: unknown, context: ExecutionContext) => {
     const ctx = GqlExecutionContext.create(context);
     const request = ctx.getContext().req;
     const payload = request.auth_payload;
-    const value = payload?.[key];
-    if (!value) {
-      throw new UnauthorizedException(`Invalid token. Missing ${key}`);
+    const { clientId } = payload;
+    if (!clientId) {
+      throw new UnauthorizedException('ClientToken is required');
     }
-    return value;
+    return new AuthClientDTO(clientId);
   },
 );
