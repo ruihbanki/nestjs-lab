@@ -10,6 +10,10 @@ import { User } from './user.entity';
 import { CreateUserInput } from './create-user.input';
 import { UpdateUserInput } from './update-user.input';
 import { UsersArgs } from './users.args';
+import { AuthUser } from 'src/auth/auth-user.decorator';
+import { AuthUserDTO } from 'src/auth/auth-user.dto';
+import { UserType } from './user-type.enum';
+import { ForbiddenException } from '@nestjs/common';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -27,12 +31,20 @@ export class UsersResolver {
 
   @Query(() => User)
   async user(
-    @AuthClient() { clientId }: AuthClientDTO,
+    @AuthUser() authUser: AuthUserDTO,
     @Args('userId') userId: string,
     @Relations() relations: FindOptionsRelations<User>,
     @Select() select: FindOptionsSelect<User>,
   ) {
-    return this.usersService.findUserById(clientId, userId, relations, select);
+    if (authUser.userType === UserType.MEMBER && authUser.userId !== userId) {
+      throw new ForbiddenException('Forbidden access.');
+    }
+    return this.usersService.findUserById(
+      authUser.clientId,
+      userId,
+      relations,
+      select,
+    );
   }
 
   @Mutation(() => User)
