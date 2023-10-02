@@ -25,9 +25,6 @@ Create a migration file
 
 Decorate the class with @Entity() and @ObjectType()
 
-- Use the same class for both?
-- Use DTO? Check nest-query docs.
-
 ```
 @Entity()
 @ObjectType()
@@ -54,11 +51,23 @@ isActive: boolean;
 ## Unique field
 
 - How return a better error message?
+- Are there indexes naming conventions?
 
 ```
-@Field()
-@Column({ unique: true })
-domain: string;
+@Entity()
+@ObjectType()
+@Index('IDX_username', ['client.clientId', 'username'], { unique: true })
+export class User extends EntityBase {
+  @Field()
+  @IsEmail()
+  @Column()
+  username: string;
+
+  @ManyToOne(() => Client, { nullable: false })
+  @JoinColumn({ name: 'client_id' })
+  client: Client;
+}
+
 ```
 
 ## Optional field
@@ -105,6 +114,35 @@ available: number;
 @Field()
 @Column({ type: 'decimal', precision: 10, scale: 2 })
 price: number;
+```
+
+## Entity base
+
+Extend this class to enable creating and update of some columns
+
+```
+@ObjectType()
+@Entity()
+export abstract class EntityBase {
+  @Field()
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt?: Date;
+
+  @Field({ nullable: true })
+  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
+  deletedAt?: Date;
+
+  @Field()
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt?: Date;
+}
+
+@Entity()
+@ObjectType()
+export class Client extends EntityBase {
+  ...
+}
+
 ```
 
 # Relations
@@ -167,31 +205,27 @@ export class ProductCategory {
 
 When creating or updating a new entity, delete all existent children and add new ones and when deleting the parent delete the children too.
 
-- The creation is done by the cascade = true
-- The deletion is done by the onDelete: 'CASCADE'
-- The addition of new ones on update is made in a transaction
+- The creation is done by the cascade = true.
+- The deletion is done by the onDelete: 'CASCADE'.
+- The updating is done by a custom code, child items with id will be updated, child items without id will be inserted and items that weren't inserted or updated are deleted.
 
 ```
-@Entity()
-@ObjectType()
-export class Client {
-  @Field(() => [ClientContact], { nullable: false })
-  @OneToMany(() => ClientContact, (clientContact) => clientContact.client, {
-    nullable: false,
-    cascade: true,
-  })
-  contacts?: ClientContact[];
-}
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import {
+  DataSource,
+  FindOptionsRelations,
+  FindOptionsSelect,
+  In,
+  Not,
+  Repository,
+} from 'typeorm';
 
-@Entity()
-@ObjectType()
-export class ClientContact {
-  @ManyToOne(() => Client, (client) => client.contacts, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'client_id' })
-  client: Client;
-}
+import { Client } from './client.entity';
+import { CreateClientInput } from './create-client.input';
+import { UpdateClientInput } from './update-client.input';
+import { ClientContact } from 'src/client-contacts/client-contact.entity';
+import { ClientReport } from './client-report.dto';
 
 @Injectable()
 export class ClientsService {
@@ -206,7 +240,8 @@ export class ClientsService {
   async updateClient(
     clientId: string,
     input: UpdateClientInput,
-    options: FindOptions = {},
+    relations?: FindOptionsRelations<Client>,
+    select?: FindOptionsSelect<Client>,
   ): Promise<Client> {
     await this.dataSource.transaction(async (transactionalEntityManager) => {
       // get repositories
@@ -215,71 +250,233 @@ export class ClientsService {
       const clientContactsRepository =
         transactionalEntityManager.getRepository(ClientContact);
 
-      // delete client contacts
-      clientContactsRepository.delete({ client: { clientId } });
+      // get the client without the contacts and update
+      const { contacts, ...client } = input;
+      clientsRepository.update(clientId, client);
 
-      // update client without passing the contacts
-      const inputWithoutContacts = {
-        ...input,
-        contacts: undefined,
-      };
-      clientsRepository.update(clientId, inputWithoutContacts);
+      if (contacts) {
+        // add client to contacts
+        const contactsWithClient = contacts.map((contact) => ({
+          ...contact,
+          client: {
+            clientId,
+          },
+        }));
 
-      // insert new contacts
-      const clientContacts = input.contacts.map((c) => ({
-        ...c,
-        client: {
-          clientId,
-        },
-      }));
-      clientContactsRepository.save(clientContacts);
+        // create contacts without id
+        const contactsToCreate = contactsWithClient.filter(
+          (contact) => !contact.clientContactId,
+        );
+        const created = await clientContactsRepository.save(contactsToCreate);
+
+        // update contacts with id
+        const contactsToUpdate = contacts.filter(
+          (contact) => !!contact.clientContactId,
+        );
+        clientContactsRepository.save(contactsToUpdate);
+
+        // delete all contacts the weren't created or updated
+        const createdIds = created.map((contact) => contact.clientContactId);
+        const updatedIds = contacts
+          .filter((contact) => !!contact.clientContactId)
+          .map((contact) => contact.clientContactId);
+        const idsToNotDelete = [...createdIds, ...updatedIds];
+        clientContactsRepository.delete({
+          client: { clientId },
+          clientContactId: Not(In(idsToNotDelete)),
+        });
+      }
     });
 
-    return this.findClientById(clientId, options);
+    return this.findClientById(clientId, relations, select);
   }
 }
-```
-
-## Entity base
-
-Extend this class to enable creating and update of some columns
 
 ```
-@ObjectType()
-@Entity()
-export abstract class EntityBase {
-  @Field()
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt?: Date;
-
-  @Field({ nullable: true })
-  @DeleteDateColumn({ name: 'deleted_at', nullable: true })
-  deletedAt?: Date;
-
-  @Field()
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt?: Date;
-}
-
-@Entity()
-@ObjectType()
-export class Client extends EntityBase {
-  ...
-}
-
-```
-
-## Inheritance
-
-# Input
 
 # CRUD
 
 ## Create
 
+```
+@Resolver(() => Product)
+export class ProductsResolver {
+  constructor(private productsService: ProductsService) {}
+
+  @Mutation(() => Product)
+  async createProduct(
+    @AuthClient() { clientId }: AuthClientDTO,
+    @Args('input') input: CreateProductInput,
+    @Relations() relations: FindOptionsRelations<Product>,
+    @Select() select: FindOptionsSelect<Product>,
+  ) {
+    return this.productsService.createProduct(
+      clientId,
+      input,
+      relations,
+      select,
+    );
+  }
+}
+
+@Injectable()
+export class ProductsService {
+  constructor(
+    @InjectRepository(Product)
+    private productsRepository: Repository<Product>,
+  ) {}
+
+  async createProduct(
+    clientId: string,
+    product: CreateProductInput,
+    relations?: FindOptionsRelations<Product>,
+    select?: FindOptionsSelect<Product>,
+  ): Promise<Product> {
+    const result = await this.productsRepository.save({
+      ...product,
+      client: {
+        clientId,
+      },
+    });
+    return this.findProductById(clientId, result.productId, relations, select);
+  }
+}
+
+@InputType()
+export class CreateProductInput {
+  @Field()
+  name: string;
+
+  @Field()
+  price: number;
+
+  @Field(() => [CategoryInput])
+  categories: CategoryInput[];
+}
+
+@InputType()
+class CategoryInput {
+  @Field()
+  productCategoryId: string;
+}
+
+
+```
+
 ## Update
 
+```
+@Resolver(() => Product)
+export class ProductsResolver {
+  constructor(private productsService: ProductsService) {}
+
+  @Mutation(() => Product)
+  async updateProduct(
+    @AuthClient() { clientId }: AuthClientDTO,
+    @Args('productId') productId: string,
+    @Args('input') input: UpdateProductInput,
+    @Relations() relations: FindOptionsRelations<Product>,
+    @Select() select: FindOptionsSelect<Product>,
+  ) {
+    return this.productsService.updateProduct(
+      clientId,
+      productId,
+      input,
+      relations,
+      select,
+    );
+  }
+}
+
+@Injectable()
+export class ProductsService {
+  constructor(
+    @InjectRepository(Product)
+    private productsRepository: Repository<Product>,
+  ) {}
+
+  async updateProduct(
+    clientId: string,
+    productId: string,
+    input: UpdateProductInput,
+    relations?: FindOptionsRelations<Product>,
+    select?: FindOptionsSelect<Product>,
+  ): Promise<Product> {
+    await this.productsRepository.update(
+      {
+        productId,
+        client: {
+          clientId,
+        },
+      },
+      input,
+    );
+    return await this.findProductById(clientId, productId, relations, select);
+  }
+}
+
+@InputType()
+export class UpdateProductInput extends PartialType(CreateProductInput) {}
+
+```
+
 ## Delete
+
+```
+@Resolver(() => Product)
+export class ProductsResolver {
+  constructor(private productsService: ProductsService) {}
+
+  @Mutation(() => Product)
+  async deleteProduct(
+    @AuthClient() { clientId }: AuthClientDTO,
+    @Args('productId') productId: string,
+    @Relations() relations: FindOptionsRelations<Product>,
+    @Select() select: FindOptionsSelect<Product>,
+  ) {
+    return this.productsService.deleteProduct(
+      clientId,
+      productId,
+      relations,
+      select,
+    );
+  }
+}
+
+@Injectable()
+export class ProductsService {
+  constructor(
+    @InjectRepository(Product)
+    private productsRepository: Repository<Product>,
+  ) {}
+
+  async deleteProduct(
+    clientId: string,
+    productId: string,
+    relations?: FindOptionsRelations<Product>,
+    select?: FindOptionsSelect<Product>,
+  ): Promise<Product> {
+    const product = await this.findProductById(
+      clientId,
+      productId,
+      relations,
+      select,
+    );
+    if (!product) {
+      throw new NotFoundException('Product not found');
+    }
+    await this.productsRepository.softDelete({
+      productId,
+      client: {
+        clientId,
+      },
+    });
+    return product;
+  }
+}
+
+
+```
 
 # Find
 
@@ -359,7 +556,6 @@ export class ClientsResolver {
 Use the custom @Relations decorator to return the relations to be used in the find method. It gets this using the graphql info. E.g. { clients: true }.
 
 ```
-
 @Resolver(() => User)
 export class UsersResolver {
   constructor(private usersService: UsersService) {}
@@ -379,7 +575,6 @@ export class UsersResolver {
 Use the custom @Select decorator to return only the required query fields. E.g. { name: true, client: { id:true }}.
 
 ```
-
 @Resolver(() => User)
 export class UsersResolver {
   constructor(private usersService: UsersService) {}
@@ -391,8 +586,6 @@ export class UsersResolver {
     return this.usersService.findUsers({ select });
   }
 }
-
-```
 
 ```
 
@@ -418,6 +611,8 @@ constructor(
 private configService: ConfigService<IAppConfigService>,
 ) {}
 }
+
+```
 
 ```
 
