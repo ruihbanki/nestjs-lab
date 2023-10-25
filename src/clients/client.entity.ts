@@ -7,6 +7,7 @@ import {
   OneToMany,
   JoinColumn,
   JoinTable,
+  VirtualColumn,
 } from 'typeorm';
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { EntityBase } from 'src/utils/entity-base';
@@ -50,4 +51,11 @@ export class Client extends EntityBase {
     cascade: true,
   })
   contacts?: ClientContact[];
+
+  @Field()
+  @VirtualColumn({
+    query: (alias) =>
+      `SELECT COUNT(*) FROM "client_contact" WHERE "client_id" = ${alias}.client_id`,
+  })
+  totalContacts: number;
 }
