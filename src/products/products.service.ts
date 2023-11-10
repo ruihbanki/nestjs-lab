@@ -23,6 +23,12 @@ import {
 import { CreateProductInput } from './create-product.input';
 import { ProductsConnection } from './products-connection.dto';
 import { OffsetPageInfo } from 'src/utils/offset-page-info.object';
+import { BuyProductInput } from './buy-product.input';
+import {
+  BuyProductFail,
+  BuyProductResult,
+  BuyProductSuccess,
+} from './buy-product-result';
 
 @Injectable()
 export class ProductsService {
@@ -186,5 +192,15 @@ export class ProductsService {
       input,
     );
     return await this.findProductById(clientId, productId, relations, select);
+  }
+
+  async buyProduct(
+    clientId: string,
+    input: BuyProductInput,
+  ): Promise<typeof BuyProductResult> {
+    if (input.productId === 'invalid') {
+      return new BuyProductFail('Error');
+    }
+    return new BuyProductSuccess(clientId, input.productId);
   }
 }

@@ -11,6 +11,8 @@ import { CreateProductInput } from './create-product.input';
 import { UpdateProductInput } from './update-product.input';
 import { ProductsArgs } from './products.args';
 import { ProductsConnection } from './products-connection.dto';
+import { BuyProductInput } from './buy-product.input';
+import { BuyProductResult } from './buy-product-result';
 
 @Resolver(() => Product)
 export class ProductsResolver {
@@ -91,5 +93,13 @@ export class ProductsResolver {
       relations,
       select,
     );
+  }
+
+  @Mutation(() => BuyProductResult)
+  async buyProduct(
+    @AuthClient() { clientId }: AuthClientDTO,
+    @Args('input') input: BuyProductInput,
+  ) {
+    return this.productsService.buyProduct(clientId, input);
   }
 }
